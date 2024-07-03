@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Registration Confirmation</title>
+</head>
+<body>
+    <p>Dear [[${firstName}]] [[${lastName}]],</p>
+    <p>Here is your activation link: </p>
+    <a th:href = @{${activation_link}}>Activate</a>
+</body>
+</html>

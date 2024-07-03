@@ -1,0 +1,130 @@
+body {
+    background-color: grey;
+}
+
+#clubDiv {
+    background-color: white;
+    padding: 20px;
+    margin: 20px auto;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,.1);
+    max-width: 90%;
+}
+
+.circle {
+    border-radius: 50%;
+    width: 300px;
+    height: 300px;
+    overflow: hidden;
+    object-fit: cover;
+    object-position: center;
+    margin-right: 10px;
+    border: 1px solid black;
+}
+
+.small-circle {
+    border-radius: 50%;
+    width: 80px;
+    height: 80px;
+    overflow: hidden;
+    object-fit: cover;
+    object-position: center;
+    margin-right: 10px;
+    border: 1px solid gray;
+}
+
+.big-badge {
+    font-size: 0.8em;
+    padding: 5px 15px;
+    line-height: 1.5;
+    /*margin-left: 10px;*/
+}
+
+.club-info {
+    display: flex;
+    align-items: center;
+}
+
+.header-container {
+    max-width: 100%;
+}
+
+.header-container h1 {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 80%;
+}
+
+.sport-dropdown {
+    width: 30%;
+    font-size: 0.9em;
+    padding: 5px 15px;
+    line-height: 1.5;
+    /*margin-left: 10px;*/
+}
+
+.team-container {
+    position: relative;
+}
+
+.remove-team {
+    position: absolute;
+    right: 0;
+    display: none;
+    font-size: 40px;
+    color: red;
+    cursor: pointer;
+}
+
+.team-container:hover .remove-team {
+    display: inline;
+}
+
+#multiselectDropdown {
+    line-height: 2;
+    display: flex;
+    height: 38px;
+}
+
+.placeholder {
+    border: none;
+    cursor: default;
+    color: rgba(0, 0, 0, 0);
+    background-color: rgba(0, 0, 0, 0) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: inline-flex;
+    align-items: center;
+}
+
+#main-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 80%;
+}
+
+#clubCard {
+    width: 80rem;
+    border-radius: 12px;
+}
+
+#clubCardContainer {
+    max-width: 90%;
+    margin: 0;
+}
+
+.card-body {
+    border-radius: 12px; /* Border radius for the card body */
+}
+
+#frontend-error {
+    flex: 1;
+    align-self: flex-start;
+    overflow-wrap: break-word;
+}
+
+.list-group-item:hover {
+    background-color: lightgray;
+    cursor: pointer;
+}

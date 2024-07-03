@@ -1,0 +1,33 @@
+.navbar {
+    text-align: center;
+    white-space: nowrap;
+    background-color: #92dbea;
+}
+
+.navbar .navbar-text {
+    text-decoration: none;
+    margin: 0 2rem;
+    color: black;
+}
+
+.navbar-sides {
+    width: 2rem;
+    margin: 0 2rem;
+}
+
+#notificationDropdown {
+    width: 20rem;
+}
+
+#notification-list {
+    max-height: 300px;
+}
+
+.overflow-scroll {
+    scrollbar-width: thin; /* For Firefox */
+}
+
+/* For Webkit based browsers (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+    width: 6px; /* Adjust the width as needed */
+}

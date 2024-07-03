@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://thymeleaf.org">
+<head>
+  <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.1.3/css/bootstrap.min.css}">
+  <link rel="stylesheet" type="text/css" th:href="@{/css/styles.css}">
+  <meta http-equiv="Content-Type" context="text/html; charset=UTF-8">
+  <script th:src="@{/webjars/bootstrap/5.1.3/js/bootstrap.min.js}"></script>
+  <link th:href="@{/css/custom.css}" rel="stylesheet">
+  <link th:href="@{/css/viewTeamActivities.css}" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" th:href="@{/css/navbar.css}">
+  <title>Challenges | Hopper.</title>
+</head>
+<body class="bg-dark" onload="openModalIfNotification()">
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+<div class="main-content container">
+  <div class="row justify-content-center">
+    <div class="col-lg-10 card bg-light p-5">
+      <h2>Your Available Challenges</h2>
+      <hr>
+      <div>
+        <div class="d-flex flex-wrap gap-3 justify-content-center mb-4">
+          <div th:each="challenge : ${availableChallenges}"
+               style="cursor: pointer; width: 30%; min-width: 300px; position: relative;"
+               class="card p-3 pt-5 challenge-card"
+               th:classappend="${challenge.isWaitingOnUsers == true} ? 'waiting-on-users' : ''"
+               th:onclick="|openChallengeModal(${challenge.id}, availableChallenges, this.dataset.author)|"
+               th:data-author="${challenge.userGeneratedFor.firstName}">
+
+            <!-- Overlay to show when waiting on users -->
+            <div th:if="${challenge.isWaitingOnUsers == true}" class="waiting-overlay d-flex flex-column">
+              <svg height="50" width="50">
+                <circle cx="25" cy="25" r="20" stroke="white" stroke-width="4" fill="none" />
+                <line x1="25" y1="25" x2="25" y2="10" style="stroke:white;stroke-width:3" />
+                <line x1="25" y1="25" x2="40" y2="25" style="stroke:white;stroke-width:3" />
+              </svg>
+              <p>Waiting on other users</p>
+            </div>
+            <div class="position-absolute w-100"
+                 style="height: 30px; top: 0; left: 0; z-index: 1; background-color: rgb(220,209,220)"></div>
+            <h5 th:text="${challenge.title}" style="z-index: 2" class="mb-1"></h5>
+            <h6>
+              <span th:text="${challenge.hops}"></span> Hops
+              <span th:if="${challenge.isShared}" class="rounded-pill gold-background">+20%!</span>
+            </h6>
+            <p class="w-100" style="height: 100px; max-height: 100px; overflow-y: auto; border-radius: 2px"
+               th:text="${challenge.goal}"></p>
+            <div style="position: relative; height: 16px; margin-left: 0" class="d-flex flex-nowrap align-items-center">
+              <div th:if="${challenge.userGeneratedFor.id} == ${user.id}" id="share-icon" style="opacity: 0.8; background-color: #256ed9" th:onclick="|showShareChallengeModal(${challenge.id}); event.stopImmediatePropagation()|" th:data-author="${challenge.userGeneratedFor.firstName}"
+                   class="d-flex flex-nowrap align-items-center py-1 px-2 rounded-pill text-light">
+                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor"
+                     class="bi bi-send-fill" viewBox="0 0 16 16">
+                  <path d="M15.964.686a.5.5 0 0 0-.65-.65L.767 5.855H.766l-.452.18a.5.5 0 0 0-.082.887l.41.26.001.002 4.995 3.178 3.178 4.995.002.002.26.41a.5.5 0 0 0 .886-.083l6-15Zm-1.833 1.89L6.637 10.07l-.215-.338a.5.5 0 0 0-.154-.154l-.338-.215 7.494-7.494 1.178-.471-.47 1.178Z"/>
+                </svg>
+                <div th:id="share-text" style="width: 5ch; overflow: hidden">
+                  <p class="mb-0 text-nowrap small" style="margin-left: 0.25rem">Share</p>
+                </div>
+              </div>
+
+              <div th:unless="${challenge.userGeneratedFor.id} == ${user.id}">
+                <div th:id="share-text" class="d-flex align-items-center">
+                  <span class="small">Invited by </span>
+                  <a th:href="@{/user/}+${challenge.userGeneratedFor.id}" onclick="event.stopImmediatePropagation()" class="text-body"><p class="mb-0 text-nowrap small" style="max-width: 20ch; overflow: hidden;margin-left: 0.25rem; text-overflow:ellipsis;" th:text="|${challenge.userGeneratedFor.firstName}|"></p></a>
+                </div>
+              </div>
+            </div>
+            <hr>
+            <div class="w-100 d-flex align-items-center text-black-50">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                   class="bi bi-alarm-fill" viewBox="0 0 16 16" style="min-width: 16px; margin-right: 5px">
+                <path d="M6 .5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1H9v1.07a7.001 7.001 0 0 1 3.274 12.474l.601.602a.5.5 0 0 1-.707.708l-.746-.746A6.97 6.97 0 0 1 8 16a6.97 6.97 0 0 1-3.422-.892l-.746.746a.5.5 0 0 1-.707-.708l.602-.602A7.001 7.001 0 0 1 7 2.07V1h-.5A.5.5 0 0 1 6 .5zm2.5 5a.5.5 0 0 0-1 0v3.362l-1.429 2.38a.5.5 0 1 0 .858.515l1.5-2.5A.5.5 0 0 0 8.5 9V5.5zM.86 5.387A2.5 2.5 0 1 1 4.387 1.86 8.035 8.035 0 0 0 .86 5.387zM11.613 1.86a2.5 2.5 0 1 1 3.527 3.527 8.035 8.035 0 0 0-3.527-3.527z"/>
+              </svg>
+              <p class='text-nowrap small mb-0'
+                 th:text="${'Expires: ' + #temporals.format(challenge.getEndDate(), 'hh:mma dd MMMM yyyy')}"></p>
+            </div>
+          </div>
+          <p th:if="${#lists.isEmpty(availableChallenges)}">No challenges available.</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-10 card bg-light p-5">
+      <h2>Completed Challenges</h2>
+      <hr>
+      <div>
+        <div class="d-flex flex-wrap gap-3 justify-content-center mb-4">
+          <div th:each="challenge : ${completedChallenges}"
+               style="cursor: pointer; width: 30%; min-width: 300px" class="card p-3 pt-5"
+               th:onclick="|openChallengeModal(${challenge.id}, completedChallenges, true)|">
+            <div class="position-absolute w-100"
+                 style="height: 30px; top: 0; left: 0; z-index: 1; background-color: rgb(220,209,220)"></div>
+            <h5 th:text="${challenge.title}" style="z-index: 2"></h5>
+            <p class="w-100" style="height: 100px; max-height: 100px; overflow-y: auto; border-radius: 2px"
+               th:text="${challenge.goal}"></p>
+            <hr>
+            <div class="w-100 d-flex align-items-center text-black-50">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                   class="bi bi-alarm-fill" viewBox="0 0 16 16" style="min-width: 16px; margin-right: 5px">
+                <path d="M6 .5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1H9v1.07a7.001 7.001 0 0 1 3.274 12.474l.601.602a.5.5 0 0 1-.707.708l-.746-.746A6.97 6.97 0 0 1 8 16a6.97 6.97 0 0 1-3.422-.892l-.746.746a.5.5 0 0 1-.707-.708l.602-.602A7.001 7.001 0 0 1 7 2.07V1h-.5A.5.5 0 0 1 6 .5zm2.5 5a.5.5 0 0 0-1 0v3.362l-1.429 2.38a.5.5 0 1 0 .858.515l1.5-2.5A.5.5 0 0 0 8.5 9V5.5zM.86 5.387A2.5 2.5 0 1 1 4.387 1.86 8.035 8.035 0 0 0 .86 5.387zM11.613 1.86a2.5 2.5 0 1 1 3.527 3.527 8.035 8.035 0 0 0-3.527-3.527z"/>
+              </svg>
+              <p class='text-nowrap small mb-0'
+                 th:text="${'Expires: ' + #temporals.format(challenge.getEndDate(), 'hh:mma dd MMMM yyyy')}">
+              </p>
+
+            </div>
+          </div>
+          <p th:if="${#lists.isEmpty(completedChallenges)}">You have not yet completed any challenges</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div th:replace="~{fragments/challengeModal :: challengeModal}"></div>
+<div th:replace="~{fragments/shareChallengeModal :: shareChallengeModal}"></div>
+
+<script>
+
+  const challengeId = /*[[${challengeId}]]*/ null;
+
+  function openChallengeForm() {
+
+    if (challengeId) {
+      console.log(availableChallenges.filter(challenge => challenge.id === challengeId))
+      openChallengeModal(challengeId, availableChallenges, availableChallenges.filter(challenge => challenge.id === challengeId)[0].userGeneratedFor.firstName);
+      openCompleteChallenge();
+    }
+  }
+
+  openChallengeForm();
+
+</script>
+
+<script>
+  const notificationChallengeId = [[${notificationChallengeId}]];
+
+  function openModalIfNotification() {
+    if (notificationChallengeId) {
+      openChallengeModal(notificationChallengeId, availableChallenges, availableChallenges.filter(challenge => challenge.id === notificationChallengeId)[0].userGeneratedFor.firstName);
+    }
+  }
+</script>
+
+</body>
+</html>

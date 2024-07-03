@@ -1,0 +1,77 @@
+<div th:fragment="navbar" class="navbar-box">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid w-75 border-bottom pb-2 pt-2">
+            <a class="navbar-brand" th:href="@{/}">HOPPER.</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mb-2 mb-lg-0 ms-auto">
+                    <li th:if="${user != null}" class="nav-item dropdown me-1">
+                        <a class="nav-link" th:href="@{/leaderboard/weekly}">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-trophy" viewBox="0 0 16 16">
+                                <path d="M2.5.5A.5.5 0 0 1 3 0h10a.5.5 0 0 1 .5.5c0 .538-.012 1.05-.034 1.536a3 3 0 1 1-1.133 5.89c-.79 1.865-1.878 2.777-2.833 3.011v2.173l1.425.356c.194.048.377.135.537.255L13.3 15.1a.5.5 0 0 1-.3.9H3a.5.5 0 0 1-.3-.9l1.838-1.379c.16-.12.343-.207.537-.255L6.5 13.11v-2.173c-.955-.234-2.043-1.146-2.833-3.012a3 3 0 1 1-1.132-5.89A33.076 33.076 0 0 1 2.5.5zm.099 2.54a2 2 0 0 0 .72 3.935c-.333-1.05-.588-2.346-.72-3.935zm10.083 3.935a2 2 0 0 0 .72-3.935c-.133 1.59-.388 2.885-.72 3.935zM3.504 1c.007.517.026 1.006.056 1.469.13 2.028.457 3.546.87 4.667C5.294 9.48 6.484 10 7 10a.5.5 0 0 1 .5.5v2.61a1 1 0 0 1-.757.97l-1.426.356a.5.5 0 0 0-.179.085L4.5 15h7l-.638-.479a.501.501 0 0 0-.18-.085l-1.425-.356a1 1 0 0 1-.757-.97V10.5A.5.5 0 0 1 9 10c.516 0 1.706-.52 2.57-2.864.413-1.12.74-2.64.87-4.667.03-.463.049-.952.056-1.469H3.504z"/>
+                            </svg>
+                        </a>
+                    </li>
+                    <li th:if="${user != null}" class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" id="searchDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+                            </svg>
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="searchDropdown">
+                            <li><a class="dropdown-item" th:href="@{/all-profiles}">Profiles</a></li>
+                            <li><a class="dropdown-item" th:href="@{/teams}">Teams</a></li>
+                        </ul>
+                    </li>
+                    <li th:if="${user != null}" class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" id="addDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-plus-circle" viewBox="0 0 16 16">
+                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                            </svg>
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="addDropdown">
+                            <li><a class="dropdown-item" th:href="@{/club/create}">Club</a></li>
+                            <li><a class="dropdown-item" th:href="@{/create_team}">Team</a></li>
+                            <li><a class="dropdown-item" th:href="@{/blog/create}">Post</a></li>
+                            <li><a class="dropdown-item" th:href="@{/activity/create}">Activity</a></li>
+                        </ul>
+                    </li>
+
+
+
+                    <div th:replace="~{fragments/notificationPanel :: notificationsPanel}"></div>
+
+                </ul>
+                <div class="d-flex">
+                    <div th:if="${user == null}">
+                        <a class="btn btn-outline-light me-2" th:href="@{/login}">Login</a>
+                        <a class="btn btn-primary text-light" th:href="@{/register}">Register</a>
+                    </div>
+                    <div th:if="${user != null}" th:object="${user}">
+                        <div class="dropdown">
+                            <a class="nav-link dropdown-toggle" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <div style="width: 50px; height: 50px; position: relative; display: inline-block;">
+                                    <img th:if="${user.profilePicture != null}" th:src="@{'/' + ${user.profilePicturePath}}" width="100%" height="100%" alt="Profile Picture" class="rounded-circle" style="z-index: 1; position: relative; object-fit: cover;">
+                                    <img th:if="${user.profilePicture == null}" th:src="@{/images/defaultPicture.png}" width="100%" height="100%" alt="Profile Picture" class="rounded-circle" style="z-index: 1; position: relative;">
+                                    <img th:if="${user.border?.path}" th:src="@{${user.border?.path}}" class="position-absolute" width="66px" height="auto" style="z-index: 2; left: -8px; top: -8px;">
+                                </div>
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="profileDropdown">
+                                <li><a class="dropdown-item" th:href="@{/user}">View Profile</a></li>
+                                <li>
+                                    <form th:action="@{/logout}" method="post">
+                                        <button type="submit" class="dropdown-item">Logout</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+</div>

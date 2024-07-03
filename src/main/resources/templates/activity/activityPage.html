@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Type" context="text/html; charset=UTF-8">
+  <title>View Activity | TAB</title>
+  <script th:src="@{/webjars/bootstrap/5.1.3/js/bootstrap.min.js}"></script>
+  <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.1.3/css/bootstrap.min.css}">
+  <link rel="stylesheet" type="text/css" th:href="@{/css/styles.css}">
+  <link rel="stylesheet" th:href="@{/css/styles.css}">
+  <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.1.3/css/bootstrap.min.css}">
+  <link rel="stylesheet" type="text/css" th:href="@{/css/navbar.css}">
+  <link rel="stylesheet" th:href="@{/css/editImagePicker.css}">
+  <link rel="stylesheet" th:href="@{/css/teamPage.css}">
+  <link rel="stylesheet" th:href="@{/css/custom.css}">
+</head>
+<body class="bg-dark">
+<div class="d-flex flex-column vh-100 bg-dark">
+
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+
+<p id="success-message" class="alert alert-success mb-0" style="position: fixed; bottom: 20px; right: 20px" th:if="${successMessage}" th:text="${successMessage}"></p>
+
+
+<div class="container main-content">
+  <div class="row justify-content-center align-items-center h-100">
+    <div class="col-lg-12 justify-content-center">
+      <div class="card bg-light text-dark rounded-form shadow p-5">
+        <h2 >Activity Details</h2>
+        <hr>
+        <div class="row" id="team-container">
+          <div class="col-6" id="team-card-left">
+            <h4>Activity Team:</h4>
+            <a>
+              <div class="mb-2" th:if="${activity.team != null}" id="profile-pic-container" style="width: 40%">
+                <div class="profile-pic mb-2" th:switch="${activity.team.image}" style="cursor: pointer" th:onclick="|window.location.href='@{/teams}/${activity.team.id}'|">
+                  <img class="circle bg-light" th:case="null" th:id="savedImage" th:src="@{'/images/defaultPictureTeam.png'}">
+                  <img class="circle bg-light" th:case="*" th:id="savedImage" th:src="@{${'../' + activity.team.imagePath}}">
+                </div>
+              </div>
+            </a>
+<div style="display: flex; align-items: center;">
+  <div th:if="${activity.team == null}" style="display: inline-block;">
+    <p style="margin: 0;">No team</p>
+  </div>
+  <div th:if="${activity.team != null}" style="display: inline-block;">
+    <h4 style="margin: 0;" th:text="${activity.team.teamName}"></h4>
+  </div>
+  <a style="text-decoration: none; margin-left: 15px;" th:href="@{'/activity/edit/' + ${activity.id}}">
+    <button th:if="${activity.team == null || (activity.team != null && (activity.team.managers.contains(user)
+                                    || activity.team.coaches.contains(user)))}" class="btn btn-primary">Edit</button>
+  </a>
+</div>
+
+            <h6>Description:</h6>
+            <div class="">
+              <p th:text="${activity.description}"></p>
+            </div>
+            <div class="row" id="info-container">
+              <div class="col-12">
+                <div class="row">
+                  <div class="col-5">
+                    <h6>Type:</h6>
+                    <p th:text="${#strings.capitalize(#strings.toLowerCase(activity.type))}"></p>
+                  </div>
+                  <div class="col-7" th:if="${activity.location.city} != null">
+                    <div th:if="${activity.location!=null && !(#strings.isEmpty(activity.location.city) && #strings.isEmpty(activity.location.country))}">
+                      <h6>Location: </h6>
+                      <p th:text="${activity.location.city + ' ' + activity.location.country}"></p>
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-5">
+                    <h6>Start time:</h6>
+                    <p th:text="${activity.convertDateFormat(activity.startTime)}"></p>
+                  </div>
+                  <div class="col-7">
+                    <h6>End time:</h6>
+                    <p th:text="${activity.convertDateFormat(activity.endTime)}"></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <form th:action="@{'/activity'} + ${'/updateScore\'} + ${activity.id}" method="post"
+                  th:object="${activityScore}" enctype="multipart/form-data">
+              <div style="margin-bottom: 10px" th:if="${activity.type.name() == 'FRIENDLY' || activity.type.name() == 'GAME'}">
+                <h6 class="mt-1">Score:</h6>
+                <div style="display: inline-block; width: 10ch; margin-right: 10px">
+                  <label id="lblHome" for="scoreHome" style="display: block">Home:</label>
+                  <input id="scoreHome" class="form-control" style="display: block" th:field="*{homeScore}"
+                         oninput="validateField('scoreErrorBox', isScoreValid)" disabled>
+                </div>
+                <div style="display: inline-block; width: 10ch; margin-right: 10px">
+                  <label id="lblAway" for="scoreAway" style="display: block">Away:</label>
+                  <input id="scoreAway" class="form-control" style="display: block" th:field="*{awayScore}"
+                         oninput="validateField('scoreErrorBox', isScoreValid)" disabled>
+                </div>
+                <div style="display: inline-block;">
+                  <button class="btn btn-primary"  style="display: none" id="saveScore">Save Score</button>
+                  <button style="display: inline-block" class="btn btn-primary" onclick="showInput()" id="updateScore" type="button">Edit Score</button>
+                </div>
+              </div>
+
+
+
+              <div th:if="${activity.type.name() == 'FRIENDLY' || activity.type.name() == 'GAME'}">
+
+              <p class="error-box alert alert-danger" id="scoreErrorBox">Score must contain one or more numbers separated by dash - symbols</p>
+
+              </div>
+            </form>
+            <div th:if="${activity_create_success}" class="alert alert-success" th:text="${activity_create_success}"></div>
+            <div th:if="${activity_create_error}" class="alert alert-danger" th:text="${activity_create_error}"></div>
+
+          </div>
+          <div class="col-6" id="team-card-right">
+            <div id="lineupBox" th:if="${activity.team != null}">
+              <div class="d-flex  p-2">
+                <h3>Lineups</h3>
+              </div>
+              <div class="row pb-3">
+                <div class="border" style="padding: 0">
+                  <ul class="nav nav-tabs">
+                    <li class="nav-item">
+                      <a class="nav-link active" id="lineupTab" onclick="toLineup()">Starters</a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link" id="subTab" onclick="toSubs()">Substitutes</a>
+                    </li>
+                  </ul>
+                  <div id="lineupDiv">
+                    <div class="container-fluid p-0 pt-3" style="height: 300px; overflow-y: auto;">
+                    </div>
+                  </div>
+                  <div hidden id="substituteDiv">
+                    <div class="container-fluid p-0 pt-3" style="height: 300px; overflow-y: auto;">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mt-2" id="button_div">
+          <a th:href="@{/home}"><button class="btn btn-outline-dark">Back to home</button></a>
+          <a th:href="@{/activity/create}"><button class="btn btn-primary">Create another activity</button></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+</body>
+
+<script th:inline="javascript">
+
+  const baseUrl = /*[[${basePath}]]*/ '';
+
+  function toLineup() {
+    document.getElementById("lineupDiv").hidden = false;
+    document.getElementById("lineupTab").className = "nav-link active";
+    document.getElementById("subTab").className = "nav-link";
+    document.getElementById("substituteDiv").hidden = true;
+  }
+
+  function toSubs() {
+    document.getElementById("lineupDiv").hidden = true;
+    document.getElementById("subTab").className = "nav-link active";
+    document.getElementById("lineupTab").className = "nav-link";
+    document.getElementById("substituteDiv").hidden = false;
+  }
+
+  function populateUsersToDiv(userList, targetDiv) {
+    targetDiv.innerHTML = ''; // clear current users
+    for (let user of userList) {
+      let userProfile = document.createElement('div');
+      userProfile.value = user.id;
+      userProfile.classList.add('user-profile', 'col-sm-6');
+      userProfile.onclick = () => bubbleClick(userProfile);
+
+      let imageWrapper = document.createElement('div');
+      imageWrapper.style.width = '80px';
+      imageWrapper.style.height = '80px';
+      imageWrapper.style.position = 'relative';
+      imageWrapper.style.display = 'inline-block';
+
+      let profilePicture = document.createElement('img');
+      let imageUrl = (user.profilePicturePath !== null ? baseUrl + user.profilePicturePath.slice(1) : baseUrl + 'images/defaultPicture.png');
+      profilePicture.src = imageUrl;
+      profilePicture.style.width = '100%';
+      profilePicture.style.height = '100%';
+      profilePicture.style.position = 'relative';
+      profilePicture.style.zIndex = '1';
+      profilePicture.classList.add('rounded-circle');
+
+      imageWrapper.append(profilePicture);
+
+      if(user.border?.path) {
+        let borderImage = document.createElement('img');
+        borderImage.src = baseUrl + 'images/borders/' + user.border?.path;
+        borderImage.style.zIndex = '2';
+        borderImage.style.left = '-8px';
+        borderImage.style.top = '-8px';
+        borderImage.style.width = '100px';
+        borderImage.style.height = 'auto';
+        borderImage.classList.add('position-absolute');
+        imageWrapper.append(borderImage);
+      }
+
+      userProfile.append(imageWrapper);
+
+      let userName = document.createElement('div');
+      userName.style.marginTop = '0.7em';
+      let firstNameSpan = document.createElement('span');
+      let lastNameSpan = document.createElement('span');
+      firstNameSpan.innerText = user.firstName + ' ';
+      lastNameSpan.innerText = user.lastName;
+      userName.append(firstNameSpan, lastNameSpan);
+      userProfile.append(userName);
+
+      targetDiv.appendChild(userProfile);
+    }
+  }
+
+  let savedLineupList = [[${starterLineup}]];
+  console.log(savedLineupList)
+  let savedSubstitutesList = [[${substituteLineup}]];
+  let lineupDiv = document.querySelector("#lineupDiv").querySelector(".container-fluid");
+  let substituteDiv = document.querySelector("#substituteDiv").querySelector(".container-fluid");
+
+  populateUsersToDiv(savedLineupList, lineupDiv);
+  populateUsersToDiv(savedSubstitutesList, substituteDiv);
+
+</script>
+
+<script type="text/javascript" th:inline="javascript">
+
+  let scoreHome = document.getElementById("scoreHome")
+  let scoreAway = document.getElementById("scoreAway")
+
+
+  scoreHome.value = /*[[${(activity.activityScore==null) ? (0) : (activity.activityScore.homeScore)}]]*/ '0';
+  scoreAway.value = /*[[${(activity.activityScore==null) ? (0) : (activity.activityScore.awayScore)}]]*/ '0';
+
+  let editScoreFlag = false;
+
+  makeAllErrorBoxesInvisible();
+
+  function makeAllErrorBoxesInvisible() {
+    let errorBoxes = document.getElementsByClassName('error-box');
+
+    for (let i = 0; i < errorBoxes.length; i++) {
+      errorBoxes[i].style.display = 'none';
+    }
+  }
+
+  function updateFields(typeIdVers) {
+    let selectedStat = typeIdVers.value;
+    console.log(selectedStat)
+    if (selectedStat === 'FACT') {
+      factFields.style.display = 'block';
+      scoreFields.style.display = 'none';
+      subFields.style.display = 'none';
+    } else if(selectedStat === 'SCORE_EVENT'){
+      factFields.style.display = 'none';
+      scoreFields.style.display = 'block';
+      subFields.style.display = 'none';
+    } else if(selectedStat === 'SUBSTITUTION'){
+      factFields.style.display = 'none';
+      scoreFields.style.display = 'none';
+      subFields.style.display = 'block';
+    } else {
+      factFields.style.display = 'none';
+      scoreFields.style.display = 'none';
+      subFields.style.display = 'none';
+    }
+  }
+
+  function showInput() {
+    if (!editScoreFlag) {
+      updateScore.classList.remove("btn-primary");
+      updateScore.classList.add("btn-danger");
+      scoreHome.style.display = 'block';
+      scoreAway.style.display = 'block';
+      scoreHome.disabled = false;
+      scoreAway.disabled = false;
+      lblHome.style.display = 'block';
+      lblAway.style.display = 'block';
+      saveScore.style.display = 'inline-block';
+      updateScore.innerHTML = "Cancel";
+    }
+    else {
+      updateScore.classList.add("btn-primary");
+      updateScore.classList.remove("btn-danger");
+      scoreHome.disabled = true;
+      scoreAway.disabled = true;
+      scoreHome.value = /*[[${(activity.activityScore==null) ? (0) : (activity.activityScore.homeScore)}]]*/ 0;
+      scoreAway.value = /*[[${(activity.activityScore==null) ? (0) : (activity.activityScore.awayScore)}]]*/ 0;
+      saveScore.style.display = 'none';
+      updateScore.innerHTML = "Edit Score";
+      validateField('scoreErrorBox', isScoreValid)
+    }
+    editScoreFlag = !editScoreFlag;
+  }
+
+  async function saveScoreRequest(path) {
+    const response = await fetch(path + '?homeScore=' + scoreHome.value + '&awayScore=' + scoreAway.value)
+    /* disables the score box again */
+    editScoreFlag = false;
+    updateScore.classList.add("btn-primary");
+    updateScore.classList.remove("btn-danger");
+    scoreHome.disabled = true;
+    scoreAway.disabled = true;
+    saveScore.style.display = 'none';
+    updateScore.innerHTML = "Edit Score";
+  }
+
+  function isScoreValid() {
+    let scoreHome = document.getElementById("scoreHome").value;
+    let scoreAway = document.getElementById("scoreAway").value;
+    let scoreErrorBox = document.getElementById("scoreErrorBox");
+
+    let regex = /^([0-9]+)?$/;
+    let scoreHomeValid = regex.test(scoreHome);
+    let scoreAwayValid = regex.test(scoreAway);
+    let scoreValid = (scoreHomeValid && scoreAwayValid)
+
+    if (!scoreValid) {
+      scoreErrorBox.textContent = "Score must contain one or more numbers separated by dash - symbols"
+      return false;
+    }
+    return true;
+  }
+
+  function isScoreEventValid() {
+    let scoreHome = document.getElementById("pointsScored").value;
+    let scoreErrorBox = document.getElementById("scoreErrorBoxEvent");
+
+    let regexDashed = /^([0-9]+(-[0-9])*)?$/;
+    scoreHomeValid = regexDashed.test(scoreHome);
+    scoreValid = (scoreHomeValid)
+    if (!scoreValid) {
+      scoreErrorBox.textContent = "Score must contain one or more numbers separated by dash - symbols"
+      return false;
+    }
+    return true;
+  }
+
+  function isDescriptionValid() {
+        let desc = document.getElementById("description").value;
+        let descErrorBox = document.getElementById("descErrorBox");
+
+        if (desc === '') {
+            descErrorBox.textContent = "Description is required."
+            return false;
+        }
+
+        let regex = /^[\s\S]{0,255}$/;
+        descriptionValid = regex.test(desc);
+        if (!descriptionValid) {
+            descErrorBox.textContent = "Description must be no more than 255 characters long."
+            return false;
+        }
+        return true;
+
+    }
+
+  function validateField(textBoxName, isValid) {
+    let textBox = document.getElementById(textBoxName);
+    if (isValid()) {
+      textBox.style.display = 'none';
+      document.getElementById('saveScore').disabled = false;
+    } else {
+      textBox.style.display = 'block';
+      document.getElementById('saveScore').disabled = true;
+    }
+  }
+</script>
+
+
+<script>
+  const successMessage = document.getElementById('success-message');
+
+  setTimeout(() => {
+    successMessage.remove();
+  }, 2800);
+</script>
+
+<script type="text/javascript" th:inline="javascript">
+  statisticSelect = document.getElementById("typeIdTwo");
+  focussedStatistic = [[${(focussedStatistic)}]];
+  if (focussedStatistic) statisticSelect.value = focussedStatistic;
+  statisticSelect.dispatchEvent(new Event('change'));
+</script>
+
+</html>

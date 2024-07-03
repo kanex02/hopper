@@ -1,0 +1,258 @@
+.main-content {
+    margin-top: 3rem;
+    padding-bottom: 3rem;
+}
+
+.home_page_buttons{
+    text-align: center;
+}
+
+.home_page_buttons a{
+    text-decoration: none;
+    display: block;
+}
+
+#home_page_product_title {
+    margin-top: 3rem;
+    text-align: center;
+}
+
+#login_page_title{
+    text-align: center;
+}
+
+.login_page_inputs{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login_page_login_buttons{
+    text-align: center;
+}
+
+#login_page_register_button a{
+    text-align: center;
+    text-decoration: none;
+    display: block;
+}
+
+#register_page_title{
+    text-align: center;
+}
+
+.register_page_inputs{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.register_page_reg_buttons{
+    text-align: center;
+}
+
+.user_page{
+    text-align: center;
+}
+
+#edit_page_title{
+    text-align: center;
+}
+
+.edit_page_inputs{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.edit_page_edit_buttons{
+    text-align: center;
+}
+
+.all_profiles_page_table{
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.all_profiles_page_buttons{
+    display: flex;
+    justify-content: center;
+}
+
+.details_page {
+    text-align: center;
+}
+
+#all_profiles_home_button {
+    display: flex;
+    justify-content: center;
+}
+
+#favouriteSports {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+}
+
+
+.autocomplete {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+
+.autocomplete-items {
+    position: absolute;
+    border: 1px solid #d4d4d4;
+    border-bottom: none;
+    border-top: none;
+    z-index: 99;
+    /*position the autocomplete items to be the same width as the container:*/
+    top: 100%;
+    left: 0;
+    right: 0;
+    color: #252423;
+    background-color: #F6F4F2;
+}
+.autocomplete-items div {
+    padding: 10px;
+    cursor: pointer;
+    color: #252423;
+    background-color: #F6F4F2;
+    border-bottom: 1px solid #d4d4d4;
+}
+.autocomplete-items div:hover {
+    /*when hovering an item:*/
+    background-color: #e9e9e9;
+}
+
+#changesSavedMessage {
+    text-align: center;
+    width: 250px;
+    height: 50px;
+    /*margin: auto;*/
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 10px;
+    padding: 10px;
+}
+
+.user-profile {
+    text-align: center;
+    font-family: Arial, sans-serif;
+    float: left;
+    padding-right: 20px;
+    padding-top: 15px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.user-image {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto;
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+.input-number::-webkit-inner-spin-button,
+.input-number::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+.input-number {
+    -moz-appearance: textfield;
+}
+
+.square {
+    position: relative;
+    padding: 0 !important;
+}
+.square:before {
+    content: "";
+    float: left;
+    padding-top: 100%;
+}
+.tooltip-container {
+    position: relative;
+    display: inline-block;
+    cursor: pointer; /* Change the cursor to a pointer on hover */
+}
+
+.tooltip-text {
+    visibility: hidden;
+    width: 300px;
+    background-color: #555;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px;
+    position: absolute;
+    z-index: 1;
+    bottom: 150%; /* Position the tooltip above the icon */
+    left: 50%;
+    margin-left: -150px; /* Center the tooltip */
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.tooltip-text-small {
+    text-align: left;
+    width: 400px;
+}
+
+.tooltip-container:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
+
+
+/* ===== Scrollbar CSS ===== */
+/* Credit to https://codepen.io/stephenpaton-tech/full/JjRvGmY *
+/* Firefox */
+* {
+    scrollbar-width: auto;
+    scrollbar-color: #9e9e9e #ffffff;
+}
+
+/* Chrome, Edge, and Safari */
+*::-webkit-scrollbar {
+    width: 10px;
+}
+
+*::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0);
+}
+
+*::-webkit-scrollbar-thumb {
+    background-color: #9e9e9e;
+    border-radius: 10px;
+}
+
+/* Styling for the 'waiting' state of individual challenge cards */
+.waiting-on-users .waiting-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(128, 128, 128, 0.6); /* Semi-transparent grey */
+    color: white;
+    z-index: 2; /* Make sure it's above the card content */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Ensure that the challenge card itself is positioned relative to contain the overlay */
+.waiting-on-users {
+    position: relative;
+}
+
+.gold-background {
+    background-color: gold;
+    padding: 5px 10px;
+    border-radius: 12px;
+}

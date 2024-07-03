@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <meta context="text/html; charset=UTF-8" http-equiv="Content-Type">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title>User [[${user.id}]] | TAB</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/styles.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.1.3/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/custom.css}">
+    <link rel="stylesheet" th:href="@{/css/userProfile.css}" type="text/css">
+    <link rel="stylesheet" type="text/css" th:href="@{/css/navbar.css}">
+    <!--NB: order of the stylesheets is important; style rules are applied in the order they are loaded and can thus override each other -->
+    <script th:src="@{/webjars/bootstrap/5.1.3/js/bootstrap.min.js}"></script>
+    <script th:src="@{/js/location_suggest.js}"></script>
+</head>
+<body class="bg-dark">
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+<div class="bg-dark" id="main-content">
+    <div class="d-flex justify-content-" id="message-wrapper">
+        <div class="alert alert-danger mb-2" id="image-error-msg" role="alert"></div>
+    </div>
+    <form enctype="multipart/form-data" method="post" th:action="@{/editProfile/{userId}(userId=${profileUser.id})}"
+          th:object="${profileUser}">
+
+        <div class="container border-dark gap-3" id="user-card-container">
+            <div th:unless="${notViewingOwnPage}">
+                <div th:replace="~{fragments/hopsProgression :: hopsProgression}"></div>
+            </div>
+            <div class="card-body bg-light text-dark border-light mt-4">
+                <div class="row" id="user-container">
+                    <div class="col-6" id="user-card-left">
+                        <div id="pic-and-error-wrapper">
+                            <div id="profile-pic-container" style="width: 50%">
+                                <div class="profile-pic" th:switch="${profileUser.profilePicture}">
+                                    <img alt="Profile Picture"
+                                         class="rounded-circle profile-image" height="100%"
+                                         th:if="${profileUser.profilePicture != null}"
+                                         th:src="@{'/' + ${profileUser.profilePicturePath}}" width="100%">
+                                    <img alt="Profile Picture" class="rounded-circle profile-image"
+                                         height="100%" th:if="${profileUser.profilePicture == null}"
+                                         th:src="@{/images/defaultPicture.png}"
+                                         width="100%">
+                                    <img class="border-image" th:if="${profileUser.border?.path}"
+                                         th:src="@{${profileUser.border?.path}}">
+
+                                    <div class="edit-details" hidden id="editPicIcon" th:unless="${notViewingOwnPage}">
+                                        <img accept="image/png, image/jpeg, image/jpg, image/svg+xml"
+                                             class="circle bg-light" src="" style="display: none"
+                                             th:id="imagePreview">
+                                        <div class="profile-pic-picker">
+                                            <input accept=".png, .jpg, .jpeg" id="imageUpload" name="imageUpload"
+                                                   type='file'/>
+                                            <label for="imageUpload"
+                                                   th:style="'--image: url(\'' + @{/images/pencil-square.svg} + '\')'"></label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <br>
+
+                        <h1 class="card-title normal-details" id="user-name"
+                            th:text="${profileUser.firstName} + ' ' + ${profileUser.lastName}"></h1>
+                        <div class="edit-details row" hidden id="editNameRow">
+                            <div class="col-4">
+                                <span>First Name</span>
+                                <div class="tooltip-container">
+                                    <svg class="bi bi-question-circle" fill="currentColor"
+                                         height="16" viewBox="0 0 16 16"
+                                         width="16" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                        <path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z"/>
+                                    </svg>
+                                    <div class="tooltip-text tooltip-text-small">
+                                        <ul>
+                                            <li>Must be between 3 and 255 characters long.</li>
+                                            <li>Can contain only letters, including uppercase and lowercase.</li>
+                                            <li>Diacritics like accents are allowed.</li>
+                                            <li>Hyphens and spaces are allowed but must be followed by a letter.</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <input id="firstNameInput"
+                                       placeholder="First Name"
+                                       th:class="${editErrors != null && #maps.containsKey(editErrors, 'firstName')} ? 'form-control bg-transparent text-dark is-invalid' : 'form-control bg-transparent border-dark text-dark'"
+                                       th:field="*{firstName}"
+                                       th:value="${profileUser.firstName}" type="text"/>
+                                <p class="invalid-feedback"
+                                   th:if="${editErrors != null && #maps.containsKey(editErrors, 'firstName')} "
+                                   th:text="${editErrors['firstName']}"></p>
+                            </div>
+                            <div class="col-4">
+                                <span>Last Name</span>
+                                <div class="tooltip-container">
+                                    <svg class="bi bi-question-circle" fill="currentColor"
+                                         height="16" viewBox="0 0 16 16"
+                                         width="16" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                        <path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z"/>
+                                    </svg>
+                                    <div class="tooltip-text tooltip-text-small">
+                                        <ul>
+                                            <li>Must be between 3 and 255 characters long.</li>
+                                            <li>Can contain only letters, including uppercase and lowercase.</li>
+                                            <li>Diacritics like accents are allowed.</li>
+                                            <li>Hyphens and spaces are allowed but must be followed by a letter.</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <input id="lastNameInput"
+                                       placeholder="Last Name"
+                                       th:class="${editErrors != null && #maps.containsKey(editErrors, 'lastName')} ? 'form-control bg-transparent text-dark is-invalid' : 'form-control bg-transparent border-dark text-dark'"
+                                       th:field="*{lastName}"
+                                       th:value="${profileUser.lastName}" type="text"/>
+                                <p class="invalid-feedback"
+                                   th:if="${editErrors != null && #maps.containsKey(editErrors, 'lastName')} "
+                                   th:text="${editErrors['lastName']}"></p>
+
+                            </div>
+                            <div class="d-flex col-4 align-items-end">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <button class="btn btn-primary edit-details" hidden
+                                                th:unless="${notViewingOwnPage}" type="submit">Save
+                                        </button>
+                                    </div>
+
+                                    <div class="col-6">
+                                        <button class="btn btn-outline-dark edit-details" hidden onclick="disableEdit()"
+                                                th:unless="${notViewingOwnPage}" type="button">Cancel
+                                        </button>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="badge-container normal-details" id="badges">
+                            <div th:each="badge : ${profileUser.badges}" class="badge-item">
+                                <img alt="Badge" class="badge-image"
+                                     data-bs-toggle="tooltip" th:src="@{${badge.path}}"
+                                     title="Badge">
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2 flex-wrap" id="edit-buttons" th:unless="${notViewingOwnPage}">
+
+                            <div class="d-flex">
+                                <button class="btn btn-outline-dark normal-details" type="button"
+                                        onclick="showBadgeModal()">Choose Badges
+                                </button>
+                            </div>
+
+                            <div class="d-flex">
+                                <button class="btn btn-outline-dark normal-details" type="button"
+                                        onclick="showBorderModal()">Choose Border
+                                </button>
+                            </div>
+
+                            <div class="border border-dark rounded-1 p-2 normal-details" th:unless="${notViewingOwnPage}">
+                                <div class="row">
+                                    <div class="col-6 text-center border-end border-dark"
+                                         onclick="openModalAndShowTab('followers')" style="cursor: pointer">
+                                        <p class="m-0" th:text="${#lists.size(followers)}"></p>
+                                        <span>Followers</span>
+                                    </div>
+                                    <div class="col-6 text-center" onclick="openModalAndShowTab('following')"
+                                         style="cursor: pointer">
+                                        <p class="m-0" th:text="${#lists.size(following) + #lists.size(followingTeams)
+                                                                    + #lists.size(followingClubs)}"></p>
+                                        <span>Following</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="modal fade" id="followersModal" tabindex="-1" role="dialog"
+                                 aria-labelledby="followersModalLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header justify-content-center">
+                                            <ul class="nav nav-tabs" id="myTabs">
+                                                <li class="nav-item">
+                                                    <a class="nav-link active" id="followers-tab" data-bs-toggle="tab"
+                                                       href="#followers"
+                                                       th:text="'Followers (' + ${#lists.size(followers)} + ')'"></a>
+                                                </li>
+                                                <li class="nav-item">
+                                                    <a class="nav-link" id="following-tab" data-bs-toggle="tab"
+                                                       href="#following"
+                                                       th:text="'Following (' + ${#lists.size(following) + #lists.size(followingTeams)
+                                                                    + #lists.size(followingClubs)} + ')'"></a>
+                                                </li>
+                                                <li class="nav-item">
+                                                    <a class="nav-link" id="mutuals-tab" data-bs-toggle="tab"
+                                                       href="#mutuals"
+                                                       th:text="'Mutuals (' + ${#lists.size(mutuals)} + ')'"></a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="tab-content" id="myTabContent">
+                                                <div class="tab-pane fade show active scrollable" id="followers"
+                                                     style="max-height: 400px">
+                                                    <ul class="list-group">
+                                                        <span th:if="${#lists.size(followers) == 0}">You don't have any followers.</span>
+                                                        <li th:each="follower : ${followers}"
+                                                            class="list-group-item d-flex align-items-center">
+                                                            <a class="position-relative" th:href="@{'/user/' + ${follower.id}}">
+                                                                <img th:if="${follower.profilePicture != null}"
+                                                                     th:src="@{'/' + ${follower.profilePicturePath}}"
+                                                                     width="50px" height="50px" alt="Profile Picture"
+                                                                     class="rounded-circle"
+                                                                     style="z-index: 1; position: relative;">
+                                                                <img th:if="${follower.profilePicture == null}"
+                                                                     th:src="@{/images/defaultPicture.png}" width="50px"
+                                                                     height="50px" alt="Profile Picture"
+                                                                     class="rounded-circle"
+                                                                     style="z-index: 1; position: relative;">
+                                                                <img th:if="${follower.border?.path}"
+                                                                     th:src="@{${follower.border?.path}}"
+                                                                     class="position-absolute" width="66px"
+                                                                     height="auto"
+                                                                     style="z-index: 2; left: -8px; top: -8px;">
+                                                                <span class="ms-4 text-dark"
+                                                                      th:text="${follower.getFullName}"></span>
+                                                            </a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+
+                                                <div class="tab-pane fade scrollable" id="following"
+                                                     style="max-height: 400px">
+                                                    <h5>Users</h5>
+                                                    <span th:if="${#lists.size(following) == 0}">You are not following anyone yet!</span>
+                                                    <li th:each="followee : ${following}"
+                                                        class="list-group-item d-flex align-items-center">
+                                                        <a class="position-relative" th:href="@{'/user/' + ${followee.id}}">
+                                                            <img th:if="${followee.profilePicture != null}"
+                                                                 th:src="@{'/' + ${followee.profilePicturePath}}"
+                                                                 width="50px" height="50px" alt="Profile Picture"
+                                                                 class="rounded-circle"
+                                                                 style="z-index: 1; position: relative;">
+                                                            <img th:if="${followee.profilePicture == null}"
+                                                                 th:src="@{/images/defaultPicture.png}" width="50px"
+                                                                 height="50px" alt="Profile Picture"
+                                                                 class="rounded-circle"
+                                                                 style="z-index: 1; position: relative;">
+                                                            <img th:if="${followee.border?.path}"
+                                                                 th:src="@{${followee.border?.path}}"
+                                                                 class="position-absolute" width="66px" height="auto"
+                                                                 style="z-index: 2; left: -8px; top: -8px;">
+                                                            <span class="ms-4 text-dark"
+                                                                  th:text="${followee.getFullName}"></span>
+                                                        </a>
+                                                    </li>
+                                                    <hr>
+                                                    <h5>Teams</h5>
+                                                    <span th:if="${#lists.size(followingTeams) == 0}">You are not following any teams yet.</span>
+                                                    <li th:each="team : ${followingTeams}"
+                                                        class="list-group-item d-flex align-items-center">
+                                                        <a class="position-relative" th:href="@{'/teams/' + ${team.id}}">
+                                                            <img th:if="${team.image != null}"
+                                                                 th:src="@{${'../' + team.imagePath}}"
+                                                                 width="50px" height="50px" alt="Profile Picture"
+                                                                 class="rounded-circle"
+                                                                 style="z-index: 1; position: relative;">
+                                                            <img th:if="${team.image == null}"
+                                                                 th:src="@{'/images/defaultPictureTeam.png'}" width="50px"
+                                                                 height="50px" alt="Profile Picture"
+                                                                 class="rounded-circle"
+                                                                 style="z-index: 1; position: relative;">
+                                                            <span class="ms-4 text-dark"
+                                                                  th:text="${team.getTeamName}"></span>
+                                                        </a>
+                                                    </li>
+                                                    <hr>
+                                                    <h5>Clubs</h5>
+                                                    <span th:if="${#lists.size(followingClubs) == 0}">You are not following any clubs yet.</span>
+                                                    <li th:each="club : ${followingClubs}"
+                                                        class="list-group-item d-flex align-items-center">
+                                                        <a class="position-relative" th:href="@{'/club/' + ${club.id}}">
+                                                            <img th:if="${club.imageName != null}"
+                                                                 th:src="@{${'/' + club.imagePath}}"
+                                                                 width="50px" height="50px" alt="Profile Picture"
+                                                                 class="rounded-circle"
+                                                                 style="z-index: 1; position: relative;">
+                                                            <img th:if="${club.imageName == null}"
+                                                                 th:src="@{'/images/defaultClubPicture.png'}" width="50px"
+                                                                 height="50px" alt="Profile Picture"
+                                                                 class="rounded-circle"
+                                                                 style="z-index: 1; position: relative;">
+                                                            <span class="ms-4 text-dark"
+                                                                  th:text="${club.getName}"></span>
+                                                        </a>
+                                                    </li>
+                                                </div>
+
+                                                <div class="tab-pane fade scrollable" id="mutuals"
+                                                     style="max-height: 400px">
+                                                    <span th:if="${#lists.size(mutuals) == 0}">You do not have any mutual followers.</span>
+                                                    <li th:each="mutual : ${mutuals}"
+                                                        class="list-group-item d-flex align-items-center">
+                                                        <a class="position-relative" th:href="@{'/user/' + ${mutual.id}}">
+                                                            <img th:if="${mutual.profilePicture != null}"
+                                                                 th:src="@{'/' + ${mutual.profilePicturePath}}"
+                                                                 width="50px" height="50px" alt="Profile Picture"
+                                                                 class="rounded-circle"
+                                                                 style="z-index: 1; position: relative;">
+                                                            <img th:if="${mutual.profilePicture == null}"
+                                                                 th:src="@{/images/defaultPicture.png}" width="50px"
+                                                                 height="50px" alt="Profile Picture"
+                                                                 class="rounded-circle"
+                                                                 style="z-index: 1; position: relative;">
+                                                            <img th:if="${mutual.border?.path}"
+                                                                 th:src="@{${mutual.border?.path}}"
+                                                                 class="position-absolute" width="66px" height="auto"
+                                                                 style="z-index: 2; left: -8px; top: -8px;">
+                                                            <span class="ms-4 text-dark"
+                                                                  th:text="${mutual.getFullName}"></span>
+                                                        </a>
+                                                    </li>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex gap-2" style="margin-left: auto">
+                                <button class="btn btn-outline-dark normal-details" onclick="enableEdit()"
+                                        th:unless="${notViewingOwnPage}"
+                                        type="button">Edit Profile
+                                </button>
+
+<!--                                <button class="btn btn-outline-dark edit-details" hidden onclick="disableEdit()"-->
+<!--                                        th:unless="${notViewingOwnPage}" type="button">Cancel-->
+<!--                                </button>-->
+
+<!--                                <button class="btn btn-primary edit-details" hidden-->
+<!--                                        th:unless="${notViewingOwnPage}" type="submit">Save Changes-->
+<!--                                </button>-->
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <h4 class="card-subtitle" id="favourite-sports">Favourite Sports</h4>
+                        <input id="selectedSports" name="selectedSportOptions" type="hidden" value="">
+                        <div class="card-text normal-details"
+                             th:switch="${#lists.isEmpty(profileUser.getFavouriteSportNamesList())}">
+                            <p th:case="true">None</p>
+                            <p th:case="false" th:text="${profileUser.getFavouriteSportNamesString()}"></p>
+                        </div>
+                        <div class="edit-details" hidden>
+                            <div class="d-flex flex-wrap gap-2 mb-3" id="sport-list-div"
+                                 style="max-height: 130px; overflow-y: auto">
+                                <h4 class="mb-0"><span class="sport-badge bg-info">No Favourite Sport Selected</span>
+                                </h4>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <select class="form-select border-dark bg-transparent" id="sportSelect"
+                                        placeholder="Select Sports">
+                                    <option th:each="sport : ${sportOptions}"
+                                            th:selected="${favouriteSports.contains(sport)}"
+                                            th:text="${sport.name}" th:value="${sport.id}"
+                                    ></option>
+                                </select>
+                                <button class="btn btn-primary flex-shrink-0" id="add-sport-button" onclick="addSport()"
+                                        type="button">Add Sport
+                                </button>
+                            </div>
+                            <br>
+                        </div>
+                        <div style="display: flex; align-items: center;">
+                            <h4 class="card-subtitle">Email</h4>
+                            <div class="tooltip-container edit-details" hidden style="margin-left: 0.2rem">
+                                <svg class="bi bi-question-circle" fill="currentColor"
+                                     height="16" viewBox="0 0 16 16"
+                                     width="16" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                    <path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z"/>
+                                </svg>
+                                <div class="tooltip-text tooltip-text-small">
+                                    <ul>
+                                        <li>Must be a valid, unique email address.</li>
+                                        <li>Cannot be empty or blank.</li>
+                                        <li>Should follow the standard email format like 'example@example.com'.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="card-text normal-details" th:text="${profileUser.email}"></p>
+                        <div class="edit-details" hidden>
+                            <input id="email"
+                                   name="email"
+                                   placeholder="Email" required
+                                   th:class="${editErrors != null && #maps.containsKey(editErrors, 'email')} ? 'form-control bg-transparent text-dark is-invalid' : 'form-control bg-transparent border-dark text-dark'"
+                                   th:field="*{email}" th:value="${profileUser.email}" type="email"/>
+                            <p class="invalid-feedback"
+                               th:if="${editErrors != null && #maps.containsKey(editErrors, 'email')} "
+                               th:text="${editErrors['email']}"></p>
+                            <br>
+                        </div>
+
+                        <button id="followButton" type="button" class="btn btn-primary" th:if="${notViewingOwnPage}">
+                            Follow
+                        </button>
+
+                        <div id="private-user-data" th:unless="${notViewingOwnPage}">
+                            <div id="location=data">
+                                <h4 class="card-subtitle">Location</h4>
+                                <div class="d-flex gap-3 py-1">
+                                    <p class="card-text" th:if="${profileUser.location}" th:text="${profileUser.location}" style="margin: auto 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></p>
+                                    <button class="btn btn-outline-dark flex-shrink-0" data-bs-target="#locationModal"
+                                            data-bs-toggle="modal" type="button" style="min-width: 100px;">Edit Location
+                                    </button>
+                                </div>
+                            </div>
+                            <div>
+
+                                <div style="display: flex; align-items: center;">
+                                    <h4 class="card-subtitle">Date of Birth</h4>
+                                    <div class="tooltip-container edit-details" hidden style="margin-left: 0.2rem">
+                                        <svg class="bi bi-question-circle" fill="currentColor"
+                                             height="16" viewBox="0 0 16 16"
+                                             width="16" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                            <path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z"/>
+                                        </svg>
+                                        <div class="tooltip-text">
+                                            <ul>
+                                                <li>Must be older than 13 years old.</li>
+                                                <li>Must not be over 150 years old.</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="card-text normal-details" th:text="${profileUser.dateOfBirth}"></p>
+                                <div class="edit-details" hidden>
+                                    <input id="dateOfBirth"
+                                           name="dateOfBirth"
+                                           placeholder="Date of Birth" required
+                                           th:attr="field='${dateOfBirth}'"
+                                           th:class="${editErrors != null && #maps.containsKey(editErrors, 'dateOfBirth')} ? 'form-control bg-transparent text-dark is-invalid date-invalid' : 'form-control bg-transparent border-dark text-dark'"
+                                           th:value="${profileUser.getDateOfBirth()}"
+                                           type="date"/>
+                                    <p class="invalid-feedback"
+                                       th:if="${editErrors != null && #maps.containsKey(editErrors, 'dateOfBirth')} "
+                                       th:text="${editErrors['dateOfBirth']}"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr>
+                    </div>
+                    <div class="col-6" id="user-card-right">
+
+                        <h4>Team List</h4>
+                        <div class="scrollable">
+                            <table class="table text-dark" id="coachedTeamsTable"
+                                   th:if="${not #lists.isEmpty(allTeams)}">
+                                <thead>
+                                </thead>
+                                <tbody>
+                                <tr th:each="Team : ${allTeams}"
+                                    th:onclick="|window.location.href='@{/teams}/${Team.id}'|">
+                                    <td>
+                                        <img alt="Profile Picture" class="align-middle rounded-circle"
+                                             height="50" th:if="${Team.image != null}" th:src="@{${Team.imagePath}}"
+                                             width="50">
+                                        <img alt="Profile Picture" class="align-middle rounded-circle"
+                                             height="50" th:if="${Team.image == null}"
+                                             th:src="@{'/images/defaultPictureTeam.png'}"
+                                             width="50">
+                                    </td>
+                                    <td class="align-middle"><span class="text-dark" th:text="${Team.teamName}"></span>
+                                    </td>
+                                    <td class="align-middle" th:switch="${team.getUserRole(profileUser)}">
+                                        <span class="text-dark" th:case="*" th:name="__${Team.id}__"
+                                              th:text="${Team.getUserRole(profileUser)}"></span>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            <div th:if="${#lists.isEmpty(allTeams)}">
+                                <td class="text-center" colspan="4">No teams found.</td>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between gap-1 mt-2" th:unless="${notViewingOwnPage}">
+                            <div id="view-activities-button">
+                                <a th:href="@{'activity/view/' + ${userId}}">
+                                    <button class="btn btn-outline-dark" id="viewActivitiesBtn" type="button">View
+                                        My
+                                        Activities
+                                    </button>
+                                </a>
+                            </div>
+                            <div class="d-flex gap-1">
+                                <a id="create-team-button" style="margin: auto" th:href="@{create_team}">
+                                    <button class="btn btn-outline-dark" id="createTeamBtn" type="button">Create
+                                        Team
+                                    </button>
+                                </a>
+                                <button class="btn btn-primary" data-bs-target="#myModal" data-bs-toggle="modal"
+                                        id="joinTeamBtn" type="button">Join Team
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+
+    </form>
+
+    <div aria-labelledby="myModalLabel" class="modal fade" id="myModal" role="dialog" tabindex="-1">
+        <div class="modal-dialog bg-light" role="document">
+            <div class="modal-content bg-light">
+                <div class="modal-header">
+                    <h5 class="card-title text-dark" id="myModalLabel">Join a Team</h5>
+                    <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="post" th:action="@{/join-team}" th:object="${formModel}">
+                        <input class="form-control bg-transparent" id="textInput" name="textInput"
+                               placeholder="Enter team invitation token"
+                               th:value="${formModel.textInput}" type="text">
+                        <p class="alert alert-danger" id="joinTeamError" th:if="${error != null}"
+                           th:text="${error}"></p>
+                        <button class="btn btn-primary mt-3" type="submit">Submit</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div aria-hidden="true" aria-labelledby="locationModalLabel" class="modal fade" id="locationModal"
+         tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="locationModalLabel">Edit Location</h5>
+                </div>
+                <form id="locationForm" method="post" th:action="@{/editProfile/{id}/edit-location(id=${profileUser.id})}"
+                      th:object="${location}">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label class="form-label" for="addressLine1">Address Line 1:</label>
+                            <input class="form-control" id="addressLine1"
+                                   th:field="*{addressLine1}"
+                                   th:oninput=suggestAddress([[@{/locationSuggest}]]) type="text">
+                        </div>
+                        <p class="alert alert-danger therror"
+                           th:if="${fieldErrors != null && #maps.containsKey(fieldErrors, 'addressLine1')}"
+                           th:text="${fieldErrors['addressLine1']}"></p>
+                        <div class="form-group">
+                            <label class="form-label" for="addressLine2">Address Line 2:</label>
+                            <input class="form-control" id="addressLine2" th:field="*{addressLine2}" type="text">
+                        </div>
+                        <p class="alert alert-danger therror"
+                           th:if="${fieldErrors != null && #maps.containsKey(fieldErrors, 'addressLine2')}"
+                           th:text="${fieldErrors['addressLine2']}"></p>
+                        <div class="form-group">
+                            <label class="form-label" for="suburb">Suburb:</label>
+                            <input class="form-control" id="suburb" th:field="*{suburb}" type="text">
+                        </div>
+                        <p class="alert alert-danger therror"
+                           th:if="${fieldErrors != null && #maps.containsKey(fieldErrors, 'suburb')}"
+                           th:text="${fieldErrors['suburb']}"></p>
+                        <div class="form-group">
+                            <label class="form-label" for="postcode">Postcode:</label>
+                            <input class="form-control" id="postcode" th:field="*{postcode}" type="text">
+                        </div>
+                        <p class="alert alert-danger therror"
+                           th:if="${fieldErrors != null && #maps.containsKey(fieldErrors, 'postcode')}"
+                           th:text="${fieldErrors['postcode']}"></p>
+                        <div class="form-group">
+                            <label class="form-label" for="city">City:</label>
+                            <input class="form-control" id="city" placeholder="Required"
+                                   th:field="*{city}" type="text">
+                        </div>
+                        <p class="alert alert-danger therror"
+                           th:if="${fieldErrors != null && #maps.containsKey(fieldErrors, 'city')}"
+                           th:text="${fieldErrors['city']}"></p>
+                        <div class="form-group">
+                            <label class="form-label" for="country">Country:</label>
+                            <input class="form-control" id="country" placeholder="Required"
+                                   th:field="*{country}" type="text">
+                        </div>
+                        <p class="alert alert-danger therror"
+                           th:if="${fieldErrors != null && #maps.containsKey(fieldErrors, 'country')}"
+                           th:text="${fieldErrors['country']}"></p>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-outline-danger" data-bs-dismiss="modal" type="button">Close</button>
+                        <button class="btn btn-primary" type="submit">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div aria-hidden="true" aria-labelledby="borderModalLabel" class="modal fade" id="borderModal"
+         tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="borderModalLabel">Select a border</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="d-flex justify-content-center m-4" th:switch="${profileUser.profilePicture}">
+                        <div class="position-relative">
+                            <img alt="Profile Picture" class="rounded-circle profile-image"
+                                 height="130px" th:if="${profileUser.profilePicture != null}"
+                                 th:src="@{'/' + ${profileUser.profilePicturePath}}"
+                                 width="130px">
+                            <img alt="Profile Picture" class="rounded-circle profile-image"
+                                 height="130px"
+                                 th:if="${profileUser.profilePicture == null}" th:src="@{/images/defaultPicture.png}"
+                                 width="130px">
+                            <img id="border-preview"
+                                 style="position: absolute; width: 170px; height: 170px; left: -20px; top: -20px"
+                                 th:src="${profileUser.border?.path}? @{${profileUser.border?.path}} : 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs'">
+                        </div>
+                    </div>
+                    <div class="d-flex flex-wrap">
+                        <img class="border-list-item" th:each="border : ${unlockedBorders}"
+                             th:onclick="|selectBorder('${border.id}', this)|"
+                             th:src="@{${border.path}}">
+                        <p class="alert alert-warning m-auto" th:if="${#lists.isEmpty(unlockedBorders)}">No borders
+                            unlocked yet. Level up to unlock borders!</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <form method="post" th:action="@{'/change-border'}">
+                        <input id="borderId" name="borderId" type="hidden" value="">
+                        <button class="btn btn-outline-danger" data-bs-dismiss="modal" type="button">Close</button>
+                        <button class="btn btn-primary" type="submit">Save changes</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div aria-hidden="true" aria-labelledby="badge-picker-title" class="modal fade" id="badge-picker-modal"
+     tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="badge-picker-title">Select up to 3 badges to display</h5>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex justify-content-center m-2">
+                    <div class="position-relative">
+                        <div class="badge-container normal-details" id="selected-badges">
+                            <div class="badge-item">
+                                <img class="badge-image" id="badge-0"
+                                     data-bs-toggle="tooltip" src="https://via.placeholder.com/1x1.png?text=+">
+                                <span class="badge badge-info">1</span>
+                            </div>
+                            <div class="badge-item">
+                                <img class="badge-image" id="badge-1"
+                                     data-bs-toggle="tooltip" src="https://via.placeholder.com/1x1.png?text=+">
+                                <span class="badge badge-info" th:text="2"></span>
+                            </div>
+                            <div class="badge-item">
+                                <img class="badge-image" id="badge-2"
+                                     data-bs-toggle="tooltip" src="https://via.placeholder.com/1x1.png?text=+">
+                                <span class="badge badge-info" th:text="3"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+                <br>
+                <div class="d-flex flex-wrap">
+                    <img th:each="badge : ${unlockedBadges}"
+                         th:onclick="|selectOrDeselectBadge('${badge.id}', this)|"
+                         alt="Badge" class="badge-image badge-list-item"
+                         data-bs-toggle="tooltip" th:src="@{${badge.path}}"
+                         title="Badge">
+                    <p class="alert alert-warning m-auto" th:if="${#lists.isEmpty(unlockedBadges)}">No badges unlocked
+                        yet. Level up to unlock badges!</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <form method="post" th:action="@{'/change-badges'}">
+                    <input id="badge0Id" name="badge0Id" type="hidden" value="">
+                    <input id="badge1Id" name="badge1Id" type="hidden" value="">
+                    <input id="badge2Id" name="badge2Id" type="hidden" value="">
+                    <button class="btn btn-outline-danger" data-bs-dismiss="modal" type="button">Close</button>
+                    <button class="btn btn-primary" type="submit">Save changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const showLocationModal = () => {
+        const modalId = [[${modalId}]];
+        if (modalId) {
+            const modalElement = document.getElementById('locationModal');
+            const modal = new bootstrap.Modal(modalElement);
+
+            modalElement.addEventListener('shown.bs.modal', function () {
+                const modalTitle = modalElement.querySelector('.modal-title');
+                modalTitle.focus();
+            })
+
+            modal.show();
+        }
+    }
+
+    showLocationModal()
+</script>
+
+<script>
+    const showBadgeModal = () => {
+
+        const badgeModal = new bootstrap.Modal(document.getElementById('badge-picker-modal'));
+        badgeModal.show();
+    }
+
+    class BadgeManager {
+        constructor() {
+            this.sourceList = [];
+        }
+
+        resetPreviewSources() {
+            const placeholder = 'https://via.placeholder.com/1x1.png?text=+';
+
+            for (let index = 0; index < 3; index++) {
+                const previewId = 'badge-' + index;
+                const badgeElementId = 'badge' + index + 'Id';
+                const previewImage = document.getElementById(previewId);
+                const badgeInputElement = document.getElementById(badgeElementId);
+
+                if (previewImage) {
+                    previewImage.src = placeholder;
+                }
+
+                if (badgeInputElement) {
+                    badgeInputElement.value = '';
+                }
+            }
+        }
+
+        async populatePreviews() {
+            this.resetPreviewSources();
+
+            for (let index = 0; index < this.sourceList.length && index < 3; index++) {
+                const tuple = this.sourceList[index];
+                const id = tuple[0];
+                const sourceStr = tuple[1];
+                const previewId = 'badge-' + index;
+                const badgeElementId = 'badge' + index + 'Id';
+                const previewImage = document.getElementById(previewId);
+                const badgeInputElement = document.getElementById(badgeElementId);
+
+                if (previewImage) {
+                    previewImage.src = sourceStr;
+                }
+
+                if (badgeInputElement) {
+                    badgeInputElement.value = id;
+                }
+            }
+        }
+
+        async selectOrDeselectBadge(badgeId, badgeListItem) {
+            console.log([badgeId, badgeListItem]);
+
+            if (this.sourceListContains([badgeId, badgeListItem.src])) {
+                this.sourceList = this.removeSourceListPairByBadgeId(badgeId);
+                badgeListItem.classList.remove('badge-selected');
+            } else if (this.sourceList.length < 3) {
+                badgeListItem.classList.add('badge-selected');
+                this.sourceList.push([badgeId, badgeListItem.src]);
+            }
+
+            // Wait for the populatePreviews to complete before returning
+            await this.populatePreviews();
+        }
+
+        sourceListContains(pair) {
+            return this.sourceList.some(function (existingPair) {
+                return existingPair[0] === pair[0] && existingPair[1] === pair[1];
+            });
+        }
+
+        removeSourceListPairByBadgeId(badgeId) {
+            // Use the filter method to remove pair by badgeId
+            return this.sourceList.filter(function (pair) {
+                return pair[0] !== badgeId;
+            });
+        }
+    }
+
+    // Usage
+    const badgeManager = new BadgeManager();
+
+    function selectOrDeselectBadge(badgeId, badgeListItem) {
+        badgeManager.selectOrDeselectBadge(badgeId, badgeListItem);
+    }
+
+</script>
+
+<script>
+    const showBorderModal = () => {
+        const borderModal = new bootstrap.Modal(document.getElementById('borderModal'));
+        borderModal.show();
+    }
+
+    const borderPreview = document.getElementById('border-preview');
+    const borderIdField = document.getElementById('borderId');
+    const selectBorder = (borderId, borderListItem) => {
+        borderPreview.src = borderListItem.src;
+        borderIdField.value = borderId;
+    }
+</script>
+
+<script>
+
+    const showJoinTeamModal = () => {
+        const joinModal = [[${joinTeamModal}]];
+        if (joinModal) {
+            const modalElement = document.getElementById('myModal');
+            const modal = new bootstrap.Modal(modalElement);
+
+            modalElement.addEventListener('shown.bs.modal', function () {
+                const modalTitle = modalElement.querySelector('.modal-title');
+                modalTitle.focus();
+            })
+
+            modal.show();
+
+            modalElement.addEventListener('hidden.bs.modal', function () {
+                const errorMessage = modalElement.querySelector('#joinTeamError');
+                errorMessage.textContent = '';
+                errorMessage.style.display = 'none';
+            })
+        }
+    }
+
+    showJoinTeamModal()
+</script>
+
+<script th:inline="javascript">
+
+    const sportSelect = document.getElementById("sportSelect")
+    const sportListDiv = document.getElementById("sport-list-div")
+    const addSportButton = document.getElementById("add-sport-button")
+    let sportList = []
+    let sportIds = []
+
+    const addSport = (sportId) => {
+        let sport;
+        if (sportId) {
+            for (let i = 0; i < sportSelect.options.length; i++) {
+                if (sportSelect.options[i].value === sportId.toString()) {
+                    sport = sportSelect.options[i];
+                    break;
+                }
+            }
+        } else {
+            sport = sportSelect.options[sportSelect.selectedIndex];
+        }
+
+        if (sportList.find(searchSport => searchSport[0] === sport.value)) return;
+
+        sport.disabled = true;
+        sportList.push([sport.value, sport.text]);
+        sportIds.push(sport.value);
+        document.getElementById("selectedSports").value = sportIds.join(',');
+        updateList();
+    }
+
+    const initializeSportList = () => {
+        const favouriteSportsIds = [[${profileUser.getSportIds}]]
+
+        favouriteSportsIds.forEach((id) => {
+            addSport(id);
+        });
+    }
+
+    const updateList = () => {
+        sportListDiv.innerHTML = '';
+        sportList.forEach((sport) => sportListDiv.innerHTML +=
+            `<h4 class='mb-0'>
+            <span class='sport-badge bg-primary'>${sport[1]}
+                <span onclick='remove(${sport[0]})' class="bg-transparent shadow-none" style="cursor: pointer;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle" viewBox="0 0 16 16">
+                  <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                  <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                </svg>
+                </span>
+            </span>
+        </h4>`
+        )
+
+        if (sportList.length === 0) {
+            sportListDiv.innerHTML = `<h4 class="mb-0"><span class="sport-badge bg-info">No Sports Selected</span></h4>`
+        }
+    }
+
+    const remove = (sportId) => {
+        sportList = sportList.filter(sport => {
+            return !(sport[0] === sportId.toString())
+        })
+
+        sportIds = sportIds.filter(sport => sport !== sportId.toString());
+        document.getElementById("selectedSports").value = sportIds.join(',');
+
+        for (let i = 0; i < sportSelect.options.length; i++) {
+            let sport = sportSelect.options[i]
+            if (sport.value === sportId.toString()) {
+                sport.disabled = false
+            }
+
+        }
+        updateList()
+    }
+
+    const removeAllSports = () => {
+        sportList.forEach((sport) => {
+            for (let i = 0; i < sportSelect.options.length; i++) {
+                let option = sportSelect.options[i];
+                if (option.value === sport[0]) {
+                    option.disabled = false;
+                    break;
+                }
+            }
+        });
+
+        sportList = [];
+        sportIds = [];
+
+        document.getElementById("selectedSports").value = "";
+
+        updateList();
+    }
+
+    initializeSportList()
+</script>
+
+<script>
+    const enableEdit = () => {
+        const editDetailsDivs = document.querySelectorAll(".edit-details");
+        editDetailsDivs.forEach((div) => {
+            div.hidden = false;
+        });
+
+        const normalDetailsDivs = document.querySelectorAll(".normal-details");
+        normalDetailsDivs.forEach((div) => {
+            div.hidden = true;
+        })
+    }
+
+    const disableEdit = () => {
+
+        const firstName = '[[${profileUser.firstName}]]';
+        const lastName = '[[${profileUser.lastName}]]';
+        const email = '[[${profileUser.email}]]';
+        const dateOfBirth = '[[${profileUser.dateOfBirth}]]';
+
+        const editDetailsDivs = document.querySelectorAll(".edit-details");
+        editDetailsDivs.forEach((div) => {
+            div.hidden = true;
+        });
+
+        const normalDetailsDivs = document.querySelectorAll(".normal-details");
+        normalDetailsDivs.forEach((div) => {
+            div.hidden = false;
+        })
+
+        document.getElementById("firstNameInput").value = firstName;
+        document.getElementById("lastNameInput").value = lastName;
+        document.getElementById("email").value = email;
+        document.getElementById("dateOfBirth").value = dateOfBirth;
+
+        removeAllSports();
+    }
+</script>
+
+<script>
+
+    const loadErrors = () => {
+        const hasErrors = [[${hasErrors}]]
+        if (hasErrors === true) {
+            enableEdit();
+        }
+    }
+
+    loadErrors();
+
+</script>
+
+<script>
+    function validateUpload(input) {
+        if (input.files && input.files[0]) {
+            const image = input.files[0];
+            const fileSize = image.size / 1024 / 1024; // in MB
+            if (fileSize > 10) {
+                input.value = null;
+                document.querySelector('#image-error-msg').innerText = 'File cannot exceed 10MB';
+                document.querySelector('#image-error-msg').style.visibility = 'visible';
+            } else {
+                const allowedExtensions = ['svg', 'png', 'jpg', 'jpeg'];
+                const fileExtension = image.name.split('.').pop().toLowerCase();
+                if (!allowedExtensions.includes(fileExtension)) {
+                    input.value = null;
+                    document.querySelector('#image-error-msg').innerText = 'Invalid file type. Accepted file types are .svg, .png, .jpg, .jpeg';
+                    document.querySelector('#image-error-msg').style.visibility = 'visible';
+                } else {
+                    document.querySelector('#image-error-msg').innerText = '';
+                    document.querySelector('#image-error-msg').style.visibility = 'hidden';
+                    let reader = new FileReader();
+                    reader.onload = function (e) {
+                        document.querySelector('#imagePreview').src = e.target.result;
+                        document.querySelector('#imagePreview').style.display = 'block';
+                        document.querySelector('#confirmChange').style.display = 'block';
+                        document.querySelector('#cancelChange').style.display = 'block';
+                    }
+                    reader.readAsDataURL(input.files[0]);
+                }
+            }
+        }
+    }
+
+    document.querySelector("#imageUpload").addEventListener('change', function () {
+        validateUpload(this);
+    });
+
+    document.querySelector('#image-error-msg').addEventListener('change', function () {
+        document.querySelector('#image-error-msg').style.visibility = 'visible';
+    });
+
+</script>
+
+<script th:inline="javascript">
+    const path = /*[[@{/api/follow}]]*/ "";
+    const userId = '[[${profileUser.id}]]';
+    let isFollowed = /*[[${isFollowed}]]*/ false;
+
+    let token = document.querySelector('meta[name="_csrf"]').getAttribute("content");
+    const headerName = document.querySelector('meta[name="_csrf_header"]').getAttribute("content");
+
+
+    // Initialize button state based on 'isFollowed'
+    document.addEventListener("DOMContentLoaded", function () {
+        const followButton = document.getElementById("followButton");
+        followButton.innerText = isFollowed ? "Unfollow" : "Follow";
+    });
+
+    // Follow endpoint
+    const follow = async () => {
+        await fetch(path + '/user/' + userId,
+            {
+                method: 'POST',
+                headers: {
+                    "Content-Type": "application/json",
+                    [headerName]: token
+                }
+            }
+        );
+
+        isFollowed = !isFollowed;
+        document.getElementById("followButton").innerText = isFollowed ? "Unfollow" : "Follow";
+    }
+
+    // Event listener for the button
+    document.addEventListener("DOMContentLoaded", function () {
+        const followButton = document.getElementById("followButton");
+        followButton.addEventListener("click", function () {
+            follow();
+            // Toggle button text
+            this.textContent = this.textContent === "Follow" ? "Unfollow" : "Follow";
+        });
+    });
+</script>
+
+
+<!-- Followers modal stuff -->
+<script>
+    function openModalAndShowTab(tabName) {
+        // Initialize the modal
+        var followersModal = new bootstrap.Modal(document.getElementById('followersModal'));
+
+        // Show the modal
+        followersModal.show();
+
+        // Switch to the correct tab
+        document.querySelectorAll('#myTabs .nav-link').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('show', 'active'));
+
+        document.getElementById(`${tabName}-tab`).classList.add('active');
+        document.getElementById(tabName).classList.add('show', 'active');
+    }
+
+    function showTab(tabName) {
+        document.querySelectorAll('#myTabs .nav-link').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('show', 'active'));
+
+        document.getElementById(`${tabName}-tab`).classList.add('active');
+        document.getElementById(tabName).classList.add('show', 'active');
+    }
+</script>
+
+</body>
+</html>

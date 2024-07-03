@@ -1,0 +1,61 @@
+// Colours
+$primary: #A23D3C;
+$secondary: #FF4B4B;
+$info: #06a0b2;
+$warning: #ffc107;
+$danger: #dc3545;
+$dark: #252423;
+
+@import "bootstrap/bootstrap";
+
+.bg-dark-2 {
+  background-color: #2d2c38 !important;
+}
+
+.bg-hopper-onlight {
+  background-color: #DADAD9 !important;
+}
+
+.fixed-card {
+  min-height: 400px !important;
+}
+
+.rounded-4 {
+  border-radius: 0.4rem !important;
+}
+
+.rounded-5 {
+  border-radius: 0.5rem !important;
+}
+
+.rounded-6 {
+  border-radius: 0.6rem !important;
+}
+
+.rounded-7 {
+  border-radius: 0.7rem !important;
+}
+
+.rounded-8 {
+  border-radius: 0.8rem !important;
+}
+
+.rounded-9 {
+  border-radius: 0.9rem !important;
+}
+
+.rounded-form {
+  border-radius: 1rem !important;
+}
+
+.shadow {
+  box-shadow: 0 0.5rem 1rem rgb(0 0 0 / 60%) !important
+}
+
+.no-underline {
+  text-decoration: none;
+}
+
+.no-underline:hover {
+  text-decoration: underline;
+}

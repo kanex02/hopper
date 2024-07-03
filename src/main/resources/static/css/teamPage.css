@@ -1,0 +1,117 @@
+.container {
+    width: 70%;
+    margin: auto auto 1rem;
+}
+
+@media (max-width:992px) {
+    #team-container{flex-direction: column}
+    #team-card-left{width: 100%}
+    #team-card-right{width: 100%}
+    .container{width: 90%}
+}
+
+#message-wrapper {
+    margin: auto;
+    max-width: 68%;
+}
+
+#image-error-msg {
+    text-align: left;
+    display: block;
+    visibility: hidden;
+    width: fit-content;
+}
+
+#memberRoleSaveAlert {
+    text-align: right;
+    display: block;
+    visibility: visible;
+    width: fit-content;
+}
+
+.card-body {
+    border-radius: 12px;
+    border-color: white;
+}
+
+#imageContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 15px;
+}
+
+#tableItems {
+    display: flex;
+    align-items: center;
+}
+
+#roleSelect {
+    background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'%3E%3Cpath fill='black' d='M2 0L0 2h4zm0 5L0 3h4z'/%3E%3C/svg%3E");
+}
+
+#teamInvitationTokenModal {
+    border-radius: 12px;
+}
+
+#closeButton {
+    background-color: transparent;
+    border: none;
+    color: #252423;
+}
+
+.circle {
+    border-radius: 50%;
+    width: 80px;
+    height: 80px;
+    overflow: hidden;
+    object-fit: cover;
+    object-position: center;
+    margin-right: 10px; /* add some space between image and text */
+}
+
+.club-info {
+    display: flex; /* make the container a flex container */
+    align-items: center; /* vertically align the contents in the middle */
+}
+
+#teamName {
+    white-space: normal;
+    word-wrap: break-word;
+}
+
+.user-member-list-image {
+    border: 1px solid purple;
+}
+
+#club-link {
+    color: black;
+    text-decoration: none;
+}
+
+#club-link:hover {
+    transform: scale(1.05);
+}
+
+.token-modal {
+    /*top: 30%*/
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) !important;
+
+}
+
+.divider{
+    margin-left: 5px;
+    margin-right: 5px;
+    height: 100px;
+    width: 1px;
+    background-color: red;
+}
+
+tbody tr:hover {
+    background-color: rgba(13, 110, 253, 0.57);
+    color: white;
+    cursor: pointer;
+}

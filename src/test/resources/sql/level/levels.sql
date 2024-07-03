@@ -1,0 +1,1 @@
+INSERT INTO level (id, reward_id) VALUES (4, null), (2, null), (3, null), (1, null);

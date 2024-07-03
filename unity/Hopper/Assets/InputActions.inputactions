@@ -1,0 +1,76 @@
+{
+    "name": "InputActions",
+    "maps": [
+        {
+            "name": "Controls",
+            "id": "a895ec2f-4233-4261-8125-dae779e654fa",
+            "actions": [
+                {
+                    "name": "PanCamera",
+                    "type": "Value",
+                    "id": "de57601e-b46f-4be3-80ae-61ef4c21fc47",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "StartPanning",
+                    "type": "Button",
+                    "id": "feedcf0f-ac78-4988-8071-6b16ca051a63",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "b9ac455b-d602-498f-9b0b-e3eba72cd47b",
+                    "path": "<Mouse>/delta",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PanCamera",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "94f66d0c-83a9-4d6b-9db5-f980a9b158e9",
+                    "path": "<Touchscreen>/delta",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PanCamera",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "83e719df-1bef-44c3-9229-fb2bacd598b3",
+                    "path": "<Touchscreen>/primaryTouch/tap",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "StartPanning",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "569d8e3a-97c9-4fc8-99df-eaa14669408d",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "StartPanning",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}

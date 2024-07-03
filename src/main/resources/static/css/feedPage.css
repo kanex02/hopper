@@ -1,0 +1,24 @@
+.blog-post-media {
+    object-fit: cover;
+    max-width: 100%;
+    height: auto;
+}
+
+.media-wrapper {
+    width: 100%;
+    max-height: 500px;
+    border-radius: 10px;
+    overflow: scroll;
+    border: 1px solid #d2d2d2;
+    text-align: center;
+}
+
+.row {
+    --bs-gutter-x: 0;
+}
+
+@media (max-width: 1500px) {
+    #main-content {
+        flex-direction: column !important;
+    }
+}

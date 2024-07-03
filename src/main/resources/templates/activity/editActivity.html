@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" context="text/html; charset=UTF-8">
+    <title>Edit Activity | TAB</title>
+    <script th:src="@{/js/location_suggest.js}"></script>
+    <script th:src="@{/webjars/bootstrap/5.1.3/js/bootstrap.min.js}"></script>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.1.3/css/bootstrap.min.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/css/styles.css}">
+    <link rel="stylesheet" th:href="@{/css/custom.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/css/navbar.css}">
+</head>
+<body onload="initializeLoad()" class="bg-dark">
+
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<p id="success-message" class="alert alert-success" th:if="${successMessage}" th:text="${successMessage}"></p>
+
+<div class="d-flex flex-column vh-100 bg-dark">
+    <div class="container-fluid main-content flex-grow-1 bg-dark">
+        <div class="row justify-content-center align-items-center h-100">
+        <div class="col-sm-6">
+            <div class="card bg-light text-dark mb-3 py-4 fixed-card justify-content-center rounded-form shadow p-5">
+                <div class="text-center">
+                    <h2>Edit an Activity</h2>
+                </div>
+                <form th:action="@{/activity/edit/{activityId}(activityId=${activityId})}" method="post" th:object="${activity}">
+                    <ul class="nav nav-pills mb-3" id="activityFormSteps" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="detailsTab" data-bs-toggle="pill"
+                                    data-bs-target="#step1" type="button" role="tab" aria-controls="step1"
+                                    aria-selected="true">Details
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="locationTab" data-bs-toggle="pill" data-bs-target="#step2"
+                                    type="button" role="tab" aria-controls="step2" aria-selected="false">Location
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="lineupTab1" data-bs-toggle="pill" data-bs-target="#step3"
+                                    type="button" role="tab" aria-controls="step3" aria-selected="false" hidden>
+                                Lineup
+                            </button>
+                        </li>
+                    </ul>
+
+
+                    <input type="hidden" id="lineupListInput" name="lineupList"/>
+                    <input type="hidden" id="subListInput" name="subList" />
+                    <div class="tab-content" id="activityFormStepsContent">
+                        <div class="tab-pane fade show active" id="step1" role="tabpanel" aria-labelledby="step1-tab">
+                            <div class="row g-3 mb-3">
+                                <div class="col sm-6">
+                                    <label for="typeId">Activity Type</label>
+                                    <select th:class="${#fields.hasErrors('type')} ? 'form-select bg-transparent text-dark is-invalid' : 'form-select bg-transparent border-dark text-dark'"
+                                            id="typeId"
+                                            oninput="checkForLineup()"
+                                            th:field="*{type}">
+                                        <option value="">Select type</option>
+                                        <option th:each="activityType: ${T(nz.ac.canterbury.seng302.tab.entity.activity.ActivityType).values()}"
+                                                th:value="${activityType}"
+                                                th:text="${activityType.getLabel()}">
+                                        </option>
+                                    </select>
+                                    <p th:if="${#fields.hasErrors('type')}" class="invalid-feedback"
+                                       th:errors="*{type}"></p>
+                                </div>
+
+                                <div class="col sm-6">
+                                    <label for="teamName">Team</label>
+                                    <select type="text"
+                                            th:class="${#fields.hasErrors('team')} ? 'form-select bg-transparent text-dark is-invalid' : 'form-select bg-transparent border-dark text-dark'"
+                                            id="teamName"
+                                            placeholder="Optional"
+                                            th:onchange="'onTeamChange(\''+@{/teams/getTeamMembers}+'\')'"
+                                            th:field="*{team}">
+                                            name="team">
+                                        <option value="">No team</option>
+                                        <option th:each="team : ${teams}" th:value="${team.id}"
+                                                th:text="${team.teamName}"
+                                                data-th-attr="data-dateCreated=${team.dateCreated}"></option>
+                                    </select>
+                                    <p th:if="${#fields.hasErrors('team')}" class="invalid-feedback"
+                                       th:errors="*{team}"></p>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="description">Description</label>
+                                <br/>
+                                <textarea id="description"
+                                          th:class="${#fields.hasErrors('description')} ? 'form-control bg-transparent text-dark is-invalid' : 'form-control bg-transparent border-dark text-dark'"
+                                          name="description"
+                                          th:value="${description}"
+                                          placeholder="Required"
+                                          th:field="*{description}">
+                                                </textarea>
+                                <p th:if="${#fields.hasErrors('description')}" class="invalid-feedback"
+                                   th:errors="*{description}"></p>
+                                <div>
+                                    <label for="startTime">Start On</label>
+                                    <br/>
+                                    <input type="datetime-local"
+                                           id="startTime"
+                                           step="1"
+                                           th:value="${startTime}"
+                                           th:field="*{startTime}">
+                                    <p th:if="${#fields.hasErrors('startTime')}" class="text-danger"
+                                       th:errors="*{startTime}"></p>
+                                    <br/>
+                                    <label for="endTime">End On</label>
+                                    <br/>
+                                    <input type="datetime-local"
+                                           step="1"
+                                           id="endTime"
+                                           th:value="${endTime}"
+                                           th:field="*{endTime}">
+                                    <p th:if="${#fields.hasErrors('endTime')}" class="text-danger"
+                                       th:errors="*{endTime}"></p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Lineup Section -->
+                        <div class="tab-pane fade" id="step3" role="tabpanel" aria-labelledby="step3-tab">
+                            <div id="lineupBox">
+                                <div class="d-flex justify-content-around p-2">
+                                    <h3>Selected</h3>
+                                    <h3>Available</h3>
+                                </div>
+                                <div class="row pb-3">
+                                    <div class="col-sm-6 border" style="padding: 0">
+                                        <ul class="nav nav-tabs">
+                                            <li class="nav-item">
+                                                <a class="nav-link active" id="lineupTab" onclick="toLineup()">Starters</a>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a class="nav-link" id="subTab" onclick="toSubs()">Substitutes</a>
+                                            </li>
+                                        </ul>
+                                        <div id="lineupDiv">
+                                            <div class="container-fluid p-0 pt-3" style="height: 300px; overflow-y: auto;">
+                                            </div>
+                                            <div class="px-3" style="display: flex; align-items: center;">
+                                                <h5 class="m-0" style="padding-right: 2px">Starters: </h5>
+                                                <h5 class="m-0" style="padding-right: 2px" id="starter-count">0</h5>
+                                                <h5 class="m-0" style="padding-right: 2px">/</h5>
+                                                <div class="">
+                                                    <input type="number" name="lineupSize" class="form-control input-number py-1" id="inputNumber" value="5" min="0" max="99" style="display: inline-block; width: 50px">
+                                                </div>
+                                                <div class="" style="display: flex; flex-direction: column; margin-left: 4px;">
+                                                    <button type="button" onclick="increaseNumber()" class="m-0 p-0" style="border: 0; background: rgba(0, 0, 0, 0); font-weight: bold">+</button>
+                                                    <button type="button" onclick="decreaseNumber()" class="m-0 p-0" style="border: 0; background: rgba(0, 0, 0, 0); font-weight: bold">-</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div hidden id="substituteDiv">
+                                            <div class="container-fluid p-0 pt-3" style="height: 300px; overflow-y: auto;">
+                                            </div>
+                                            <div class="px-3" style="display: flex; align-items: center; height: 48px">
+                                                <h5 class="m-0" style="padding-right: 2px">Substitutes: </h5>
+                                                <h5 class="m-0" style="padding-right: 2px" id="sub-count">0</h5>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6 user-list border pt-3 pb-3" id="user-list" style="height: 400px; overflow-y: auto;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="step2" role="tabpanel" aria-labelledby="step2-tab" th:object="${location}">
+                            <label for="addressLine1">Address 1:</label>
+                            <div class="autocomplete">
+                                <input id="addressLine1"
+                                       type="text"
+                                       th:class="${#fields.hasErrors('addressLine1')} ? 'form-control bg-transparent text-dark is-invalid' : 'form-control bg-transparent border-dark text-dark'"
+                                       placeholder="Required"
+                                       th:data-suggest-url="@{/locationSuggest}"
+                                       th:field="*{addressLine1}"
+                                       th:value="${location?.addressLine1 ?: ''}"
+                                       oninput="validateAndSuggest(this)"
+                                       data-cy="addressLine1">
+                                <p th:if="${#fields.hasErrors('addressLine1')}" class="invalid-feedback"
+                                   th:errors="*{addressLine1}"></p>
+                            </div>
+
+                            <label for="addressLine2">Address 2:</label>
+                            <input id="addressLine2"
+                                   type="text"
+                                   th:class="${#fields.hasErrors('addressLine2')} ? 'form-control bg-transparent text-dark is-invalid' : 'form-control bg-transparent border-dark text-dark'"
+                                   th:field="*{addressLine2}"
+                                   th:value="${location?.addressLine2 ?: ''}"
+                                   data-cy="addressLine2">
+                            <p th:if="${#fields.hasErrors('addressLine2')}" class="invalid-feedback"
+                               th:errors="*{addressLine2}"></p>
+
+                            <label for="suburb">Suburb:</label>
+                            <input id="suburb"
+                                   type="text"
+                                   th:class="${#fields.hasErrors('suburb')} ? 'form-control bg-transparent text-dark is-invalid' : 'form-control bg-transparent border-dark text-dark'"
+                                   th:field="*{suburb}" th:value="${location?.suburb ?: ''}"
+                                   data-cy="suburb">
+                            <p th:if="${#fields.hasErrors('suburb')}" class="invalid-feedback"
+                               th:errors="*{suburb}"></p>
+
+                            <label for="city">City:</label>
+                            <input id="city"
+                                   type="text"
+                                   th:class="${#fields.hasErrors('city')} ? 'form-control bg-transparent text-dark is-invalid' : 'form-control bg-transparent border-dark text-dark'"
+                                   placeholder="Required"
+                                   th:field="*{city}" th:value="${location?.city ?: ''}"
+                                   data-cy="city">
+                            <p th:if="${#fields.hasErrors('city')}" class="invalid-feedback"
+                               th:errors="*{city}"></p>
+
+                            <label for="postcode">Postcode:</label>
+                            <input id="postcode"
+                                   type="text"
+                                   placeholder="Required"
+                                   th:class="${#fields.hasErrors('postcode')} ? 'form-control bg-transparent text-dark is-invalid' : 'form-control bg-transparent border-dark text-dark'"
+                                   th:field="*{postcode}"
+                                   th:value="${location?.postcode ?: ''}"
+                                   data-cy="postcode">
+                            <p th:if="${#fields.hasErrors('postcode')}" class="invalid-feedback"
+                               th:errors="*{postcode}"></p>
+
+                            <label for="country">Country:</label>
+                            <input id="country"
+                                   type="text"
+                                   placeholder="Required"
+                                   th:class="${#fields.hasErrors('country')} ? 'form-control bg-transparent text-dark is-invalid' : 'form-control bg-transparent border-dark text-dark mb-4'"
+                                   th:field="*{country}" th:value="${location?.country ?: ''}"
+                                   data-cy="country">
+                            <p th:if="${#fields.hasErrors('country')}" class="invalid-feedback"
+                               th:errors="*{country}"></p>
+                        </div>
+                    </div>
+                    <!-- Submit buttons -->
+                    <div class="register_page_reg_buttons">
+                        <button class="btn btn-primary" type="submit" id="submitButton" onclick="validateForm()">Edit Activity</button>
+                        <a th:href="@{/activity/}+${activityId}">
+                            <button class="btn btn-outline-danger" type="button">Cancel</button>
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        </div>
+    </div>
+</div>
+
+
+</body>
+
+<script>
+    function initializeLoad() {
+        checkForLineup();
+        getRedirect();
+    }
+</script>
+
+<script>
+    let redirected;
+    function getRedirect() {
+        redirected = [[${redirected}]]
+        if (redirected === 1) {
+            addLocation = true;
+            document.getElementById("toggleLocationBtn").innerText = "Remove location";
+            document.getElementsByClassName("address-fields")[0].style.display = "block";
+        }
+    }
+</script>
+
+<script>
+    const successMessage = document.getElementById('success-message');
+
+    setTimeout(() => {
+        successMessage.remove();
+    }, 2800);
+</script>
+<script>
+    document.getElementById("inputNumber").addEventListener("change", (event) => {
+        let input = document.getElementById("inputNumber");
+        let value = parseInt(input.value);
+        if (value < Math.max(event.target.min, lineupList.length)) {
+            input.value = Math.max(event.target.min, lineupList.length);
+        }
+
+        if (lineupList.length === value) {
+            document.getElementById("user-list").style.filter = "opacity(60%)"
+        } else {
+            document.getElementById("user-list").style.filter = "opacity(100%)"
+        }
+    });
+
+    function decreaseNumber() {
+        var input = document.getElementById("inputNumber");
+        var value = parseInt(input.value);
+
+        if (lineupList.length === parseInt(input.value)) {
+            return;
+        }
+
+        if (value > input.min) {
+            input.value = value - 1;
+        }
+
+        let currentValue = parseInt(input.value);
+
+        if (lineupList.length === currentValue) {
+            document.getElementById("user-list").style.filter = "opacity(60%)"
+        }
+    }
+
+    function increaseNumber() {
+        var input = document.getElementById("inputNumber");
+        var value = parseInt(input.value);
+        if (value < input.max) {
+            input.value = value + 1;
+        }
+
+
+        document.getElementById("user-list").style.filter = "opacity(100%)"
+    }
+</script>
+
+<script type="text/javascript" th:inline="javascript">
+
+    let starters = [[${starters}]] || [];
+    let subs = [[${subs}]] || [];
+
+    let lineupList = starters.map(user => user.id);
+    let subList = subs.map(user => user.id);
+
+    // on load
+    document.getElementById("starter-count").innerText = lineupList.length.toString();
+    document.getElementById("inputNumber").value = lineupList.length.toString();
+
+    function bubbleClick(element) {
+        const lineupDiv = document.querySelector("#lineupDiv");
+        const subDiv = document.querySelector("#substituteDiv");
+        let targetDiv = null;
+
+        if(!lineupDiv.hidden) {
+            targetDiv = lineupDiv;
+        } else if (!subDiv.hidden) {
+            targetDiv = subDiv;
+        }
+
+        const userList = document.querySelector(".user-list");
+        const inputNumber = document.getElementById("inputNumber");
+        const currentValue = parseInt(inputNumber.value);
+
+
+
+        if(element.parentNode.parentNode === targetDiv) {
+
+            if(element.parentNode.parentNode === lineupDiv) {
+                let index = lineupList.indexOf(element.value);
+
+                if(index > -1) {
+                    lineupList.splice(index, 1);
+                }
+            } else {
+                let index = subList.indexOf(element.value);
+
+                if(index > -1) {
+                    subList.splice(index, 1);
+                }
+            }
+
+            userList.appendChild(element);
+
+            document.getElementById("user-list").style.filter = "opacity(100%)"
+
+            console.log(lineupList);
+            console.log(subList);
+
+        } else {
+
+            if (targetDiv === lineupDiv) {
+                if (lineupList.length < currentValue) {
+                    lineupList.push(element.value);
+                } else {
+                    console.log("Error");
+                    return;
+                }
+            } else {
+                subList.push(element.value);
+            }
+
+            if (lineupList.length === currentValue) {
+                document.getElementById("user-list").style.filter = "opacity(60%)"
+            }
+
+            targetDiv.querySelector(".container-fluid").appendChild(element);
+        }
+        document.getElementById("starter-count").innerText = lineupList.length.toString();
+        document.getElementById("sub-count").innerText = subList.length.toString();
+    }
+</script>
+
+<script type="text/javascript" th:inline="javascript">
+
+    let activityValid = false;
+    let descriptionValid = false;
+    let timeValid = false;
+    let cityValid = false;
+    let countryValid = false;
+    let addressLine1Valid = false;
+    let postcodeValid = false;
+
+    const requiresTeamForActivity = new Set(['GAME', 'FRIENDLY']);
+
+    makeAllErrorBoxesInvisible();
+
+    function makeAllErrorBoxesInvisible() {
+        let errorBoxes = document.getElementsByClassName('error-box');
+
+        for (let i = 0; i < errorBoxes.length; i++) {
+            errorBoxes[i].style.display = 'none';
+        }
+    }
+
+    function isCityValid() {
+        let cityField = document.getElementById("city")
+
+        if (cityField.value === "") {
+            cityValid = false
+            return false
+        }
+
+        cityValid = true
+        return true
+    }
+
+    function validateAndSuggest(inputElement) {
+        suggestAddress(inputElement.dataset.suggestUrl);
+    }
+
+    function isAddressLine1Valid() {
+        let addressLine1Field = document.getElementById("addressLine1")
+
+        if (addressLine1Field.value === "") {
+            addressLine1Valid = false
+            return false
+        }
+
+        addressLine1Valid = true
+        return true
+    }
+
+    function isPostcodeValid() {
+        let postcodeField = document.getElementById("postcode")
+
+        if (postcodeField.value === "") {
+            postcodeValid = false
+            return false
+        }
+
+        postcodeValid = true
+        return true
+    }
+
+    function isCountryValid() {
+        let countryField = document.getElementById("country")
+
+        if (countryField.value === "") {
+            countryValid = false
+            return false
+        }
+
+        countryValid = true
+        return true
+    }
+
+    function isActivityValid() {
+        activityValid = false;
+
+        let activityTypeField = document.getElementById("typeId");
+        let typeErrorBox = document.getElementById("typeErrorBox");
+
+        if (activityTypeField.value === '') {
+            typeErrorBox.innerText = "Activity type is required.";
+            return false;
+        }
+
+        if (requiresTeamForActivity.has(activityTypeField.value)) {
+            let teamField = document.getElementById("teamName");
+            if (teamField.value === '') {
+                typeErrorBox.innerText = "You must add a team for this activity type!";
+                return false;
+            }
+        }
+        activityValid = true;
+        return true;
+    }
+
+    function isTimeValid() {
+        let startTimeField = document.getElementById("startTime");
+        let endTimeField = document.getElementById("endTime");
+
+
+        // time valid is set to false at the start of the function, and will remain false if this
+        // function does an early return. If the time is valid, timeValid is set to true at the very end.
+        timeValid = false;
+
+        if (startTimeField.value === '' && endTimeField.value === '') {
+            document.getElementById("endTimeErrorBox").textContent = "Start and end times are required.";
+            return false;
+        }
+
+        if (startTimeField.value.split('-')[0].length > 4 || endTimeField.value.split('-')[0].length > 4) {
+            document.getElementById("endTimeErrorBox").textContent = "Invalid date entered!";
+            return false;
+        }
+
+        let startTime = new Date(startTimeField.value);
+        let endTime = new Date(endTimeField.value);
+
+        if (startTime > endTime) {
+            document.getElementById("endTimeErrorBox").textContent = "Start time must be before the end time!";
+            return false;
+        }
+
+
+        let teamField = document.getElementById("teamName");
+
+        if (teamField.value !== '') {
+            let dateCreated = new Date(teamField.options[teamField.selectedIndex].getAttribute('data-dateCreated'))
+            if (startTime < dateCreated) {
+                document.getElementById("endTimeErrorBox").textContent = "Start time must be after the team's date of creation!";
+                return false;
+            }
+        }
+
+        timeValid = true;
+        return true;
+    }
+
+    function isDescriptionValid() {
+        let desc = document.getElementById("description").value;
+        let descErrorBox = document.getElementById("descErrorBox");
+
+        if (desc === '') {
+            descErrorBox.textContent = "Description is required."
+            return false;
+        }
+
+        let regex = /^(?=.*\p{L}).{1,150}$/u;
+        descriptionValid = regex.test(desc);
+        if (!descriptionValid) {
+            descErrorBox.textContent = "Description must contain at least one letter and be between 1 and 150 characters long."
+            return false;
+        }
+        return true;
+
+    }
+
+    function validateField(textBoxName, isValid) {
+        let textBox = document.getElementById(textBoxName);
+        if (isValid()) {
+            textBox.style.display = 'none';
+            if (activityValid && descriptionValid && timeValid && (!addLocation || (addLocation && cityValid
+                && countryValid && postcodeValid && addressLine1Valid))) {
+                document.getElementById('submitButton').classList.add("btn-primary")
+                document.getElementById('submitButton').classList.remove("btn-secondary")
+            }
+        } else {
+            textBox.style.display = 'block';
+            document.getElementById('submitButton').classList.add("btn-secondary")
+            document.getElementById('submitButton').classList.remove("btn-primary")
+        }
+    }
+
+    function validateForm() {
+        document.getElementById('lineupListInput').value = JSON.stringify(lineupList);
+        document.getElementById('subListInput').value = JSON.stringify(subList);
+    }
+
+    function toLineup() {
+        document.getElementById("lineupDiv").hidden = false;
+        document.getElementById("lineupTab").className = "nav-link active";
+        document.getElementById("subTab").className = "nav-link";
+        document.getElementById("substituteDiv").hidden = true;
+
+        let input = document.getElementById("inputNumber");
+        let value = parseInt(input.value);
+
+        if (lineupList.length === value) {
+            document.getElementById("user-list").style.filter = "opacity(60%)"
+        } else {
+            document.getElementById("user-list").style.filter = "opacity(100%)"
+        }
+    }
+
+    function toSubs() {
+        document.getElementById("lineupDiv").hidden = true;
+        document.getElementById("subTab").className = "nav-link active";
+        document.getElementById("lineupTab").className = "nav-link";
+        document.getElementById("substituteDiv").hidden = false;
+        document.getElementById("user-list").style.filter = "opacity(100%)"
+    }
+
+    function checkForLineup() {
+        let activityTypeField = document.getElementById("typeId");
+        document.getElementById("lineupTab1").hidden = !requiresTeamForActivity.has(activityTypeField.value);
+    }
+
+</script>
+
+<script type="text/javascript" th:inline="javascript">
+
+    const baseUrl = /*[[${basePath}]]*/ '';
+
+    async function onTeamChange(path) {
+        const teamId = document.getElementById('teamName').value;
+        clearLineup();
+        if (teamId !== "") {
+            const response = await fetch(path + `?teamId=${teamId}`);
+            const userListString = await response.text();
+            const userList = JSON.parse(userListString);
+            updateUsers(userList)
+        } else {
+            clearUsers();
+        }
+    }
+
+    function updateUsers(userList) {
+        const userDiv = document.querySelector('.user-list');
+        userDiv.innerHTML = '';
+        for (let user of userList) {
+            let userProfile = document.createElement('div');
+            userProfile.value = user.id;
+            userProfile.classList.add('user-profile', 'col-sm-6');
+            userProfile.onclick = () => bubbleClick(userProfile);
+
+            let imageWrapper = document.createElement('div');
+            imageWrapper.style.width = '80px';
+            imageWrapper.style.height = '80px';
+            imageWrapper.style.position = 'relative';
+            imageWrapper.style.display = 'inline-block';
+
+            let profilePicture = document.createElement('img');
+            let imageUrl = (user.profilePicturePath !== null ? '/' + baseUrl + user.profilePicturePath.slice(1) : baseUrl + 'images/defaultPicture.png');
+            profilePicture.src = imageUrl;
+            profilePicture.style.width = '100%';
+            profilePicture.style.height = '100%';
+            profilePicture.style.position = 'relative';
+            profilePicture.style.zIndex = '1';
+            profilePicture.classList.add('rounded-circle');
+
+            imageWrapper.append(profilePicture);
+
+            if (user.border?.path) {
+                let borderImage = document.createElement('img');
+                borderImage.src = baseUrl + 'images/borders/' + user.border?.path;
+                borderImage.style.zIndex = '2';
+                borderImage.style.left = '-8px';
+                borderImage.style.top = '-8px';
+                borderImage.style.width = '100px';
+                borderImage.style.height = 'auto';
+                borderImage.classList.add('position-absolute');
+                imageWrapper.append(borderImage);
+            }
+
+            userProfile.append(imageWrapper);
+
+            let userName = document.createElement('div');
+            userName.style.marginTop = '0.7em';
+            let firstNameSpan = document.createElement('span');
+            let lastNameSpan = document.createElement('span');
+            firstNameSpan.innerText = user.firstName + ' ';
+            lastNameSpan.innerText = user.lastName;
+            userName.append(firstNameSpan, lastNameSpan);
+            userProfile.append(userName);
+
+            userDiv.appendChild(userProfile);
+        }
+    }
+
+    function populateUsersToDiv(userList, targetDiv) {
+        targetDiv.innerHTML = '';
+        for (let user of userList) {
+            let userProfile = document.createElement('div');
+            userProfile.value = user.id;
+            userProfile.classList.add('user-profile', 'col-sm-6');
+            userProfile.onclick = () => bubbleClick(userProfile);
+
+            let imageWrapper = document.createElement('div');
+            imageWrapper.style.width = '80px';
+            imageWrapper.style.height = '80px';
+            imageWrapper.style.position = 'relative';
+            imageWrapper.style.display = 'inline-block';
+
+            // Profile picture
+            let profilePicture = document.createElement('img');
+            let imageUrl = (user.profilePicturePath !== null ? baseUrl + user.profilePicturePath.slice(1) : baseUrl + 'images/defaultPicture.png');
+            profilePicture.src = imageUrl;
+            profilePicture.style.width = '100%';
+            profilePicture.style.height = '100%';
+            profilePicture.style.position = 'relative';
+            profilePicture.style.zIndex = '1';
+            profilePicture.classList.add('rounded-circle');
+
+            imageWrapper.append(profilePicture);
+
+            if(user.border?.path) {
+                let borderImage = document.createElement('img');
+                borderImage.src = baseUrl + 'images/borders/' + user.border?.path;
+                borderImage.style.zIndex = '2';
+                borderImage.style.left = '-8px';
+                borderImage.style.top = '-8px';
+                borderImage.style.width = '100px';
+                borderImage.style.height = 'auto';
+                borderImage.classList.add('position-absolute');
+                imageWrapper.append(borderImage);
+            }
+
+            userProfile.append(imageWrapper);
+
+            let userName = document.createElement('div');
+            userName.style.marginTop = '0.7em';
+            let firstNameSpan = document.createElement('span');
+            let lastNameSpan = document.createElement('span');
+            firstNameSpan.innerText = user.firstName + ' ';
+            lastNameSpan.innerText = user.lastName;
+            userName.append(firstNameSpan, lastNameSpan);
+            userProfile.append(userName);
+
+            targetDiv.appendChild(userProfile);
+        }
+    }
+
+    // prepopulate with lineup selection
+    let savedLineupList = [[${starters}]];
+    let savedSubstitutesList = [[${subs}]];
+    let savedInactivesList = [[${remaining}]];
+    let lineupDiv = document.querySelector("#lineupDiv").querySelector(".container-fluid");
+    let substituteDiv = document.querySelector("#substituteDiv").querySelector(".container-fluid");
+    let userDiv = document.querySelector('.user-list');
+
+    populateUsersToDiv(savedLineupList, lineupDiv);
+    populateUsersToDiv(savedSubstitutesList, substituteDiv);
+    populateUsersToDiv(savedInactivesList, userDiv);
+
+
+    function clearUsers() {
+        document.querySelector('.user-list').innerHTML = '';
+    }
+
+    function clearLineup() {
+        const lineupDiv = document.querySelector("#lineupDiv");
+        const subDiv = document.querySelector("#substituteDiv");
+
+        lineupDiv.querySelector(".container-fluid").innerHTML = '';
+        subDiv.querySelector(".container-fluid").innerHTML = '';
+    }
+
+</script>
+
+<script>
+    const successMessage = document.getElementById('success-message');
+
+    setTimeout(() => {
+        successMessage.remove();
+    }, 2800);
+</script>
+
+
+
+<script th:inline="javascript">
+    let addLocation = /*[[${location} ? true : false]]*/ null
+    document.getElementById("toggleLocationBtn").innerText = addLocation?"Remove location":"Add location";
+    document.getElementsByClassName("address-fields")[0].style.display = addLocation?"block":"none"
+    function toggleLocation() {
+        addLocation = !addLocation
+        document.getElementById("toggleLocationBtn").innerText = addLocation?"Remove location":"Add location";
+        document.getElementsByClassName("address-fields")[0].style.display = addLocation?"block":"none"
+        document.getElementById("city").required = addLocation
+        document.getElementById("country").required = addLocation
+        document.getElementById("cityErrorBox").style.display = 'none'
+        document.getElementById("countryErrorBox").style.display = 'none'
+        if (activityValid && descriptionValid && timeValid) {
+            document.getElementById('submitButton').classList.add("btn-primary")
+            document.getElementById('submitButton').classList.remove("btn-secondary")
+        }
+    }
+</script>
+
+</html>

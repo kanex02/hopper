@@ -1,0 +1,49 @@
+#searchbar {
+    white-space: nowrap;
+    display: flex;
+}
+
+#multiselectDropdown {
+    line-height: 2;
+    display: flex;
+    height: 38px;
+}
+
+.filterButton {
+    float: right;
+}
+
+.placeholder {
+    border: none;
+    cursor: default;
+    color: rgba(0, 0, 0, 0);
+    background-color: rgba(0, 0, 0, 0);
+    margin: 0 !important;
+    padding: 0 !important;
+    display: inline-flex;
+    align-items: center;
+}
+
+#main-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /*height: auto;*/
+    margin-top: 0rem;
+}
+
+/* RAGRGH */
+
+.multiselect-dropdown {
+    margin-top: 1rem;
+}
+
+tbody tr:hover {
+  background-color: rgba(255, 255, 255, 1); /* Fully opaque white background */
+  color: black; /* Black text */
+  cursor: pointer;
+}
+
+.profiles-table-container {
+  overflow-y: auto;
+}

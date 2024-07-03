@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <meta http-equiv="Content-Type" context="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Club [[${club.name}]] | HOPPER.</title>
+    <script th:inline="javascript" th:src="@{/js/multiselect-dropdown.js}" ></script>
+    <script th:src="@{/webjars/bootstrap/5.1.3/js/bootstrap.min.js}"></script>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.1.3/css/bootstrap.min.css}">
+
+    <link th:href="@{/css/styles.css}" rel="stylesheet">
+    <link th:href="@{/css/clubPage.css}" rel="stylesheet">
+    <link th:href="@{/css/editImagePicker.css}" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" th:href="@{/css/navbar.css}">
+    <link rel="stylesheet" th:href="@{/css/custom.css}">
+</head>
+<body onload="loadBody()" class="bg-dark">
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div id="main-content">
+
+    <div id="clubCard" class="mt-2">
+        <div class="card-body bg-light border-dark">
+
+            <div id="clubCardContainer" class="container border-dark">
+
+
+                <form th:action="@{/club/{id}(id=${club.id})}" method="post" th:object="${club}" enctype="multipart/form-data">
+                <div class="row">
+                    <!-- Left Side -->
+                    <div class="col-md-6">
+                        <div class="jumbotron">
+                            <div id="pic-and-error-wrapper">
+                                <div id="profile-pic-container" style="width: 50%">
+                                    <div class="profile-pic" th:switch="${club.imageName}">
+                                        <img class="circle bg-light" th:case="null" th:id="savedImage" th:src="@{'/images/defaultClubPicture.png'}">
+                                        <img class="circle bg-light" th:case="*" th:id="savedImage" th:src="@{${'/' + club.imagePath}}">
+                                        <div id="editPicIcon" class="edit-details" th:if="${club.getCreator() == user}" hidden>
+                                            <img class="circle bg-light" th:id="imagePreview" src="" accept="image/png, image/jpeg, image/jpg, image/svg+xml">
+                                            <div class="profile-pic-picker">
+                                                <input type='file' id="imageUpload" accept=".png, .jpg, .jpeg" name="imageUpload"/>
+                                                <label for="imageUpload" th:style="'--image: url(\'' + @{/images/pencil-square.svg} + '\')'"></label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p id="image-error-msg" class="alert alert-danger" th:if="${imageError}"
+                                   style="margin-left: 10px" th:text="${imageError}"></p>
+                                <p id="frontend-error" class="alert alert-danger"
+                                   style="visibility: hidden; margin-left: 10px"></p>
+                            </div>
+                             <div class="d-flex flex-wrap align-items-center header-container">
+                                    <h1 id="nameField" class="" style="line-height: 1;">
+                                        <span id="nameSpan" class="normal-details" th:text="${club.name}"></span>
+
+                                        <h4 id="nameHeader" class="card-text edit-details" hidden>Club Name:</h4>
+                                        <input id="nameInput" type="text" class="form-control edit-details" th:field="*{name}"
+                                               th:value="${club.name}" hidden/>
+                                    </h1>
+                                    <button id="editButton" th:if="${club.getCreator() == user}" class="big-badge mx-1 btn btn-outline-dark normal-details" type="button" onclick="enableEdit()">Edit</button>
+                             </div>
+                                <p id="descField" class="lead">
+                                    <span id="descSpan" class="normal-details" th:text="${club.description}"></span>
+                                    <h4 id="descHeader" class="card-text mt-2 edit-details" hidden>Description:</h4>
+                                    <textarea id="descInput" class="form-control edit-details" th:field="*{description}"
+                                              th:value="${club.description}" hidden></textarea>
+                                </p>
+                                <p th:if="${clubErrors != null && #maps.containsKey(clubErrors, 'name')}"
+                                   th:text="${clubErrors['name']}" class="alert alert-danger therror"></p>
+                                <p th:if="${clubErrors != null && #maps.containsKey(clubErrors, 'description')}"
+                                   th:text="${clubErrors['description']}" class="alert alert-danger therror"></p>
+                                <p>
+                                <p th:if="${clubErrors != null && #maps.containsKey(clubErrors, 'sport')}"
+                                   th:text="${clubErrors['sport']}" class="alert alert-danger therror"></p>
+                                <div>
+                                    <button id="saveButton" class="big-badge btn btn-primary mb-2 edit-details" type="submit" hidden onclick="saveProfile()">Save Changes</button>
+                                    <button id="cancelButton" class="big-badge btn btn-outline-danger mb-2 edit-details" type="button" onclick="cancelEdit()" hidden>Cancel</button>
+                                </div>
+                                    <hr>
+                            <h4 class="card-text">Sport:</h4>
+                            <p id="sportBadge" th:if="${club.associatedSport != null}" class="normal-details card-text">[[${club.associatedSport.name}]]</p>
+                                <select id="sportSelect" class="form-select sport-dropdown py-1 mb-3 edit-details" th:field="*{associatedSport}" hidden>
+                                    <div th:if="${club.associatedSport != null}">
+                                        <option value=""> No sport</option>
+                                        <option th:each="sport : ${sports}" th:value="${sport.id}"
+                                                th:text="${sport.name}" th:selected="${sport.id == club.associatedSport.id}"></option>
+                                    </div>
+                                    <div th:if="${club.associatedSport == null}">
+                                        <option value="" selected> No sport</option>
+                                        <option th:each="sport : ${sports}" th:value="${sport.id}"
+                                                th:text="${sport.name}"></option>
+                                    </div>
+                                </select>
+                                <h4 class="card-subtitle">Location:</h4>
+                                <div class="d-flex gap-2 py-1">
+                                    <span style="margin: auto 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" th:text="${club.location}"></span>
+                                    <button class="big-badge btn btn-outline-dark flex-shrink-0" th:if="${club.getCreator() == user}"
+                                            type="button" data-bs-toggle="modal" data-bs-target="#locationModal" style="min-width: 100px;">Edit Location</button>
+                                </div>
+                                </p>
+                            <hr>
+                            <button id="followButton" type="button" class="btn btn-primary mx-1 normal-details" th:if="${canFollow}">Follow</button>
+
+                        </div>
+                    </div>
+
+        <!-- Right Side -->
+        <div class="col-md-6">
+            <h1>Teams:</h1>
+            <ul class="list-group" id="teamsList">
+                <li class="list-group-item" th:each="team : ${club.teams}" th:onclick="|window.location.href='@{/teams}/${team.id}'|">
+                    <div>
+                        <img th:if="${team.imagePath != null}" th:src="@{'/' + ${team.imagePath}}" class="small-circle">
+                        <img th:if="${team.imagePath == null}" th:src="@{'/images/defaultPictureTeam.png'}" class="small-circle">
+                        [[${team.teamName}]]
+                    </div>
+                </li>
+            </ul>
+            <!-- multiselect -->
+            <div id="teamsDropdown" class="mb-3" hidden>
+                <select multiple multiselect-search="true" multiselect-select-all="true" id="teamsSelect"
+                        placeholder="Select Team" name="teams">
+                    <option th:each="team : ${teams}" th:value="${team.id}"
+                            th:text="${team.teamName}" th:selected="${#lists.contains(clubTeamIds, team.id)}"></option>
+                </select>
+            </div>
+            <p class="alert alert-warning" th:if="${#lists.isEmpty(club.teams)}">This club does not manage any teams.</p>
+            <p th:if="${clubErrors != null && #maps.containsKey(clubErrors, 'club')}"
+               th:text="${clubErrors['club']}" class="alert alert-danger therror"></p>
+        </div>
+    </div>
+    </form>
+    <div class="modal fade" id="locationModal" tabindex="-1" aria-labelledby="locationModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="locationModalLabel">Edit Location</h5>
+                </div>
+                <form id="locationForm" th:action="@{/club/{id}/edit-location(id=${club.id})}" method="post" th:object="${location}">
+                    <div class="modal-body">
+                            <div class="form-group">
+                                <label for="addressLine1" class="form-label">Address Line 1:</label>
+                                <input type="text" class="form-control" id="addressLine1" th:field="*{addressLine1}">
+                            </div>
+                            <p th:if="${fieldErrors != null && #maps.containsKey(fieldErrors, 'addressLine1')}"
+                               th:text="${fieldErrors['addressLine1']}" class="alert alert-danger therror"></p>
+                            <div class="form-group">
+                                <label for="addressLine2" class="form-label">Address Line 2:</label>
+                                <input type="text" class="form-control" id="addressLine2" th:field="*{addressLine2}">
+                            </div>
+                            <p th:if="${fieldErrors != null && #maps.containsKey(fieldErrors, 'addressLine2')}"
+                               th:text="${fieldErrors['addressLine2']}" class="alert alert-danger therror"></p>
+                            <div class="form-group">
+                                <label for="suburb" class="form-label">Suburb:</label>
+                                <input type="text" class="form-control" id="suburb" th:field="*{suburb}">
+                            </div>
+                            <p th:if="${fieldErrors != null && #maps.containsKey(fieldErrors, 'suburb')}"
+                               th:text="${fieldErrors['suburb']}" class="alert alert-danger therror"></p>
+                            <div class="form-group">
+                                <label for="postcode" class="form-label">Postcode:</label>
+                                <input type="text" class="form-control" id="postcode" th:field="*{postcode}">
+                            </div>
+                            <p th:if="${fieldErrors != null && #maps.containsKey(fieldErrors, 'postcode')}"
+                               th:text="${fieldErrors['postcode']}" class="alert alert-danger therror"></p>
+                            <div class="form-group">
+                                <label for="city" class="form-label">City:</label>
+                                <input type="text" class="form-control" id="city"
+                                       placeholder="Required" th:field="*{city}">
+                            </div>
+                            <p th:if="${fieldErrors != null && #maps.containsKey(fieldErrors, 'city')}"
+                               th:text="${fieldErrors['city']}" class="alert alert-danger therror"></p>
+                            <div class="form-group">
+                                <label for="country" class="form-label">Country:</label>
+                                <input type="text" class="form-control" id="country"
+                                       placeholder="Required" th:field="*{country}">
+                            </div>
+                            <p th:if="${fieldErrors != null && #maps.containsKey(fieldErrors, 'country')}"
+                               th:text="${fieldErrors['country']}" class="alert alert-danger therror"></p>
+
+                                        </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">Close</button>
+                                        <button type="submit" class="btn btn-primary">Save changes</button>
+                                    </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<script th:inline="javascript">
+
+    const path = /*[[@{/api/follow}]]*/ "";
+    const clubId = '[[${club.id}]]';
+    let isFollowed = /*[[${isFollowed}]]*/ false;
+
+    let token = document.querySelector('meta[name="_csrf"]').getAttribute("content");
+    const headerName = document.querySelector('meta[name="_csrf_header"]').getAttribute("content");
+
+    document.addEventListener("DOMContentLoaded", function() {
+        initializeFollowButton();
+        attachFollowButtonListener();
+    });
+
+    const initializeFollowButton = () => {
+        const followButton = document.getElementById("followButton");
+        followButton.innerText = isFollowed ? "Unfollow" : "Follow";
+    };
+
+    const attachFollowButtonListener = () => {
+        const followButton = document.getElementById("followButton");
+        followButton.addEventListener("click", async function() {
+            try {
+                const response = await fetch(`${path}/club/${clubId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        [headerName]: token
+                    }
+                });
+                if (response.ok) {
+                    isFollowed = !isFollowed;
+                    this.innerText = isFollowed ? "Unfollow" : "Follow";
+                } else {
+                    console.error('Failed to toggle follow status for club');
+                }
+            } catch (error) {
+                console.error('An error occurred:', error);
+            }
+        });
+    };
+</script>
+
+<script th:inline="javascript">
+
+    function loadBody() {
+        loadErrors();
+        showModal();
+    }
+
+    function showModal() {
+        const modalId = [[${modalId}]];
+        if (modalId) {
+            const modalElement = document.getElementById('locationModal');
+            const modal = new bootstrap.Modal(modalElement);
+
+            modalElement.addEventListener('shown.bs.modal', function () {
+                const modalTitle = modalElement.querySelector('.modal-title');
+                modalTitle.focus();
+            })
+
+            modal.show();
+
+            modalElement.addEventListener('hidden.bs.modal', function () {
+                const errorMessage = modalElement.querySelector('#joinTeamError');
+                errorMessage.textContent = '';
+                errorMessage.style.display = 'none';
+            })
+        }
+    }
+
+    function loadErrors() {
+        let hasErrors = [[${hasErrors}]]
+        if(hasErrors === true) {
+            enableEdit();
+        }
+    }
+</script>
+
+<script>
+    const enableEdit = () => {
+        toggleVisibility(".edit-details", false);
+        toggleVisibility(".normal-details", true);
+    }
+
+    const cancelEdit = () => {
+        toggleVisibility(".edit-details", true);
+        toggleVisibility(".normal-details", false);
+    }
+
+    const toggleVisibility = (selector, isHidden) => {
+        const divs = document.querySelectorAll(selector);
+        divs.forEach(div => {
+            div.hidden = isHidden;
+        });
+    }
+
+</script>
+
+<script th:inline="javascript">
+    function saveProfile() {
+        const saveButton = document.getElementById("saveButton");
+        const editButton = document.getElementById("editButton");
+
+        setTimeout(() => {
+            saveButton.style.display = 'none';
+            editButton.style.display = 'inline-block';
+        }, 1000)
+    }
+
+    MultiselectDropdown(window.MultiselectDropdownOptions);
+</script>
+
+<script>
+    function readURL(input) {
+        if (input.files && input.files[0]) {
+            const image = input.files[0];
+            const fileSize = image.size / 1024 / 1024; // in MB
+            if (fileSize > 10) {
+                input.value = null;
+                document.querySelector('#frontend-error').innerText = 'File cannot exceed 10MB';
+                document.querySelector('#frontend-error').style.visibility = 'visible';
+            } else {
+                const allowedExtensions = ['svg', 'png', 'jpg', 'jpeg'];
+                const fileExtension = image.name.split('.').pop().toLowerCase();
+                if (!allowedExtensions.includes(fileExtension)) {
+                    input.value = null;
+                    document.querySelector('#frontend-error').innerText = 'Invalid file type. Accepted file types are .svg, .png, .jpg, .jpeg';
+                    document.querySelector('#frontend-error').style.visibility = 'visible';
+                } else {
+                    document.querySelector('#frontend-error').innerText = '';
+                    document.querySelector('#frontend-error').style.visibility = 'hidden';
+                    let reader = new FileReader();
+                    reader.onload = function (e) {
+                        document.querySelector('#imagePreview').src = e.target.result;
+                        document.querySelector('#imagePreview').style.display = 'block';
+                    }
+                    reader.readAsDataURL(input.files[0]);
+                }
+            }
+        }
+
+    }
+
+    document.querySelector("#imageUpload").addEventListener('change', function() {
+        readURL(this);
+    });
+
+    document.querySelector('#frontend-error').addEventListener('change', function () {
+        document.querySelector('#frontend-error').style.visibility = 'visible';
+    });
+
+
+</script>
+
+
+</body>
+</html>

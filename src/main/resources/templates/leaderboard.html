@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://thymeleaf.org">
+<head>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.1.3/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/custom.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/css/styles.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/css/leaderboard.css}">
+    <meta http-equiv="Content-Type" context="text/html; charset=UTF-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <title>Profiles | Hopper.</title>
+    <script th:src="@{/webjars/bootstrap/5.1.3/js/bootstrap.min.js}"></script>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/navbar.css}">
+</head>
+<body class="bg-dark">
+
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div id="main-content" class="bg-dark">
+    <div class="container p-3">
+        <div class="row">
+            <div class="card bg-light border-dark mb-5 p-4">
+                <ul class="nav nav-tabs">
+                    <li class="nav-item">
+                        <a class="nav-link" th:classappend="${activeTab == 'weekly'} ? 'active' : ''" th:href="@{/leaderboard/weekly}">Weekly</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:classappend="${activeTab == 'monthly'} ? 'active' : ''" th:href="@{/leaderboard/monthly}">Monthly</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:classappend="${activeTab == 'all-time'} ? 'active' : ''" th:href="@{/leaderboard/all-time}">All Time</a>
+                    </li>
+                </ul>
+                <div style="overflow: hidden; transform: translateY(5rem);" class="top-three-wrapper">
+                    <div class="row top-three-bars justify-content-center align-items-end">
+                        <div class="col-3" th:if="${#lists.size(rows) > 1}">
+                            <div class="profile-info" th:onclick="|window.location.href='@{/user}/${rows[1].user.id}'|" style="cursor: pointer;">
+                                <span class="profile-name" th:text="${rows[1].user.firstName + ' ' + rows[1].user.lastName}"></span>
+                                <div class="profile-bg-circle" id="second-circle">
+                                    <div style="position: relative;" class="profile-picture">
+                                        <img th:if="${rows[1].user.profilePicture != null}"
+                                             th:src="@{'/' + ${rows[1].user.profilePicturePath}}" width="100%" height="100%"
+                                             alt="Profile Picture" class="rounded-circle"
+                                             style="z-index: 1; position: relative;">
+                                        <img th:if="${rows[1].user.profilePicture == null}"
+                                             th:src="@{/images/defaultPicture.png}" width="100%" height="100%"
+                                             alt="Profile Picture" class="rounded-circle"
+                                             style="z-index: 1; position: relative;">
+                                        <img th:if="${rows[1].user.border?.path}" th:src="@{${rows[1].user.border?.path}}"
+                                             class="position-absolute" width="130%" height="130%"
+                                             style="z-index: 2; left: -15%; top: -15%;">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bar second-place"></div>
+                        </div>
+                        <div class="col-3" th:if="${#lists.size(rows) > 0}">
+                            <div class="profile-info" th:onclick="|window.location.href='@{/user}/${rows[0].user.id}'|" style="cursor: pointer;">
+                                <span class="profile-name" th:text="${rows[0].user.firstName + ' ' + rows[0].user.lastName}"></span>
+                                <div class="profile-bg-circle" id="first-circle">
+                                    <div style="position: relative;" class="profile-picture">
+                                        <img th:if="${rows[0].user.profilePicture != null}"
+                                             th:src="@{'/' + ${rows[0].user.profilePicturePath}}" width="100%" height="100%"
+                                             alt="Profile Picture" class="rounded-circle"
+                                             style="z-index: 1; position: relative;">
+                                        <img th:if="${rows[0].user.profilePicture == null}"
+                                             th:src="@{/images/defaultPicture.png}" width="100%" height="100%"
+                                             alt="Profile Picture" class="rounded-circle"
+                                             style="z-index: 1; position: relative;">
+                                        <img th:if="${rows[0].user.border?.path}" th:src="@{${rows[0].user.border?.path}}"
+                                             class="position-absolute" width="130%" height="130%"
+                                             style="z-index: 2; left: -15%; top: -15%;">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bar first-place"></div>
+                        </div>
+                        <div class="col-3" th:if="${#lists.size(rows) > 2}">
+                            <div class="profile-info" th:onclick="|window.location.href='@{/user}/${rows[2].user.id}'|" style="cursor: pointer;">
+                                <span class="profile-name" th:text="${rows[2].user.firstName + ' ' + rows[2].user.lastName}"></span>
+                                <div class="profile-bg-circle" id="third-circle">
+                                    <div style="position: relative;" class="profile-picture">
+                                        <img th:if="${rows[2].user.profilePicture != null}"
+                                             th:src="@{'/' + ${rows[2].user.profilePicturePath}}" width="100%" height="100%"
+                                             alt="Profile Picture" class="rounded-circle"
+                                             style="z-index: 1; position: relative;">
+                                        <img th:if="${rows[2].user.profilePicture == null}"
+                                             th:src="@{/images/defaultPicture.png}" width="100%" height="100%"
+                                             alt="Profile Picture" class="rounded-circle"
+                                             style="z-index: 1; position: relative;">
+                                        <img th:if="${rows[2].user.border?.path}" th:src="@{${rows[2].user.border?.path}}"
+                                             class="position-absolute" width="130%" height="130%"
+                                             style="z-index: 2; left: -15%; top: -15%;">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bar third-place"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="container mt-5">
+                    <div class="row header mb-2 border-0 px-3">
+                        <div class="col-1"></div>
+                        <div class="col text-center"></div>
+                        <div class="col-1 text-end text-nowrap" style="min-width: 85px">Hops</div>
+                    </div>
+                    <div class="leaderboard border-light border border-3" style="z-index: 100; position: relative">
+
+                        <div th:each="row, iterStat : ${rows}" class="card border-0" th:onclick="|window.location.href='@{/user}/${row.user.id}'|" style="cursor: pointer;">
+                            <div class="card-body">
+                                <div class="row border-0">
+                                    <div class="col-1 d-flex align-items-center w-100 row-end">
+                                        <div style="min-width: 85px" class="d-flex align-items-center">
+                                            <span th:text="${iterStat.count}"></span>
+                                            <div class="circle">
+                                                <img th:if="${row.user.profilePicture != null}"
+                                                     th:src="@{${'../' + row.user.getProfilePicturePath()}}"
+                                                     alt="Profile Picture"/>
+                                                <img th:if="${row.user.profilePicture == null}"
+                                                     th:src="@{/images/defaultPicture.png}" w
+                                                     idth="200" height="200" alt="Profile Picture"/>
+                                            </div>
+                                        </div>
+                                        <div class="col text-center flex-shrink-1 text-break" style="overflow: hidden; white-space: nowrap; text-overflow:ellipsis;"
+                                             th:text="${row.user.firstName} + ' ' + ${row.user.lastName}"></div>
+                                        <div class="col-1 text-end text-nowrap row-end" style="min-width: 85px" th:text="${row.totalHops}"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div th:if="${currentUser}" class="card border-0">
+                            <div class="card-body">
+                                <div class="row border-0">
+                                    <div class="col-1 d-flex align-items-center w-100 row-end">
+                                        <div style="min-width: 85px" class="d-flex align-items-center">
+                                            <span th:text="You"></span>
+                                            <div class="circle">
+                                                <img th:if="${currentUser.user.profilePicture != null}"
+                                                     th:src="@{${'../' + currentUser.user.getProfilePicturePath()}}"
+                                                     alt="Profile Picture"/>
+                                                <img th:if="${currentUser.user.profilePicture == null}"
+                                                     th:src="@{/images/defaultPicture.png}" w
+                                                     idth="200" height="200" alt="Profile Picture"/>
+                                            </div>
+                                        </div>
+                                        <div class="col text-center flex-shrink-1 text-break" style="overflow: hidden; white-space: nowrap; text-overflow:ellipsis;"
+                                             th:text="${currentUser.user.firstName} + ' ' + ${currentUser.user.lastName}"></div>
+                                        <div class="col-1 text-end text-nowrap row-end" style="min-width: 85px" th:text="${currentUser.totalHops}"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function setActive(clickedElement) {
+        const navLinks = document.querySelectorAll('.nav-link');
+
+        navLinks.forEach(link => link.classList.remove('active'));
+
+        clickedElement.classList.add('active');
+    }
+</script>
+
+</body>
+</html>

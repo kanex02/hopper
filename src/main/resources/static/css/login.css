@@ -1,0 +1,16 @@
+.fixed-card {
+    min-height: 500px;
+    height: auto;
+}
+
+.center-vertically {
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+#activationMessage {
+    width: fit-content;
+    margin-left: 39%;
+}

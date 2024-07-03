@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <meta context="text/html; charset=UTF-8" http-equiv="Content-Type">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <title>Team Profile | TAB</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.1.3/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/editImagePicker.css}">
+    <link rel="stylesheet" th:href="@{/css/custom.css}">
+    <link rel="stylesheet" th:href="@{/css/teamPage.css}">
+    <script th:src="@{/webjars/bootstrap/5.1.3/js/bootstrap.min.js}"></script>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/navbar.css}">
+</head>
+<body class="bg-dark" onload="checkDisplay(), checkAlert()">
+
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="bg-dark" id="main-content">
+    <div id="message-wrapper" class="d-flex justify-content-between">
+        <div class="alert alert-danger mb-2" id="image-error-msg" role="alert"></div>
+        <div class="alert alert-danger mb-2" th:if="${formErrorRoles}" th:text="${formErrorRoles}"></div>
+        <div class="alert alert-success mb-2" id="memberRoleSaveAlert"
+             role="alert" th:if="${updatedRoles}">
+            Your member roles have been updated!
+        </div>
+    </div>
+    <div class="container border-dark" id="team-card-container">
+
+        <div class="card-body bg-light text-dark border-light">
+
+            <div class="row" id="team-container">
+
+
+                <div class="col-6" id="team-card-left">
+                    <form id="submitForm" th:action="@{/edit_team/{teamId}(teamId=${teamId})}" method="post" th:object="${team}" enctype="multipart/form-data">
+                    <!--don't be alarmed-->
+                    <div id="profile-pic-container" style="width: 50%">
+                        <div class="profile-pic" th:switch="${team.image}">
+                            <img class="circle bg-light" th:case="null" th:id="savedImage" th:src="@{'/images/defaultPictureTeam.png'}">
+                            <img class="circle bg-light" th:case="*" th:id="savedImage" th:src="@{${'../' + team.imagePath}}">
+                            <div id="editPicIcon" th:unless="${notViewingOwnPage}" class="edit-details" hidden>
+                                <img class="circle bg-light" th:id="imagePreview" src="" style="display: none" accept="image/png, image/jpeg, image/jpg, image/svg+xml">
+                                <div class="profile-pic-picker">
+                                    <input type='file' id="imageUpload" accept=".png, .jpg, .jpeg" name="imageUpload"/>
+                                    <label for="imageUpload" th:style="'--image: url(\'' + @{/images/pencil-square.svg} + '\')'"></label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <br>
+
+                    <h1 class="normal-details card-title" id="teamName" th:text="${team.teamName}"></h1>
+
+                    <div class="edit-details" hidden>
+                        <h4 class="card-text">Team Name:</h4>
+                        <input type="text" class="form-control my-2" th:field="*{teamName}" th:value="${team.teamName}">
+                    </div>
+                    <div class="alert alert-danger mb-2" th:if="${teamNameError}" th:text="${teamNameError}"></div>
+                    <div id="tokenAndEditButtons" class="d-flex justify-content-between" th:unless="${notAuthorized}">
+                        <button class="btn btn-outline-dark" data-bs-target="#teamInvitationTokenModal"
+                                data-bs-toggle="modal" id="generateNewToken"
+                                th:onclick="'generateNewToken(\''+@{/generateToken}+'\')'"
+                                type="button">Reveal Invitation Token
+                        </button>
+                        <div class="d-flex gap-2">
+                            <a class="normal-details" id="editTeamButton" onclick="enableEdit()">
+                                <button class="btn btn-outline-dark" type="button">Edit Team Details</button>
+                            </a>
+                            <div class="d-flex gap-1">
+                                <a class="edit-details" id="saveChanges" hidden>
+                                    <button class="btn btn-outline-dark" type="submit">Save Changes</button>
+                                </a>
+                                <a class="edit-details" id="cancelChanges" hidden>
+                                    <button class="btn btn-outline-danger" type="button" onclick="cancelEdit()">Cancel</button>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <h4 class="card-text">Sport:</h4>
+                    <p class="normal-details card-text" th:text="${team.sport.name}"></p>
+                    <div class="edit-details sport" hidden>
+                        <select class="form-select border-dark" name="sport" id="sportSelect"
+                                th:class="${sportError != null} ? 'form-select bg-transparent is-invalid' : 'form-select bg-transparent border-dark'"
+                                onchange="sportChanged();">
+                            <option value="" disabled th:selected="${team.sport.id == null}"> Select your option</option>
+                            <option th:each="sport : ${sports}" th:value="${sport.id}"
+                                    th:selected="${sport.id == team.sport.id}"
+                                    th:text="${sport.name}">
+                            </option>
+                        </select>
+                    </div>
+                    <div id="location=data" th:unless="${notAuthorized}">
+                        <h4 class="card-subtitle">Location:</h4>
+                        <div class="d-flex gap-3 py-1">
+                            <p class="card-text" th:text="${location}" style="margin: auto 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></p>
+                            <button class="btn btn-outline-dark flex-shrink-0" data-bs-target="#locationModal" data-bs-toggle="modal" type="button" style="min-width: 100px;">Edit Location</button>
+                        </div>
+                    </div>
+                    <div class="normal-details">
+                        <h4 class="card-text">Creation Date:</h4>
+                        <p class="card-text" th:text="${dateCreated}"></p>
+                    </div>
+                    <div th:if="${team.club != null}">
+                        <h4>Club</h4>
+                        <div class="club-info">
+                            <a class="club-info" id="club-link" th:href="@{/club} + '/' + ${team.club.id}">
+                                <img class="circle" th:src="${team.club.imagePath != null} ? @{'/' + ${team.club.imagePath}} :
+                                        @{'/images/defaultClubPicture.png'}">
+                                <p class="mx-2" style="margin-bottom: 0" th:text="${team.club.name}"></p>
+                            </a>
+
+                        </div>
+                    </div>
+                    <hr>
+                        <button id="followButton" type="button" class="btn btn-primary"
+                                th:if="${not team.managers.contains(user) and
+                                not team.members.contains(user) and
+                                not team.coaches.contains(user)}">Follow</button>
+                    </form>
+                </div>
+
+                <div class="col-6" id="team-card-right">
+                    <div id="editMemberRolesDiv">
+                        <div class="d-flex flex-row justify-content-between align-items-center">
+                            <h4>Member List</h4>
+                            <button class="btn btn-primary mb-2" id="editRolesButton"
+                                    th:if="${team.getUserRole(user) == 'manager'}"
+                                    type="button">Edit Roles
+                            </button>
+                        </div>
+
+                        <form method="post" th:action="@{/teams/{team_id}/update_roles(team_id=${teamId})}">
+                            <table class="table display table-hover text-dark text-center border-dark" id="usersTable"
+                                   th:if="${not #lists.isEmpty(users)}">
+                                <thead>
+                                </thead>
+                                <tbody>
+                                <tr th:each="userEntity : ${users}"
+                                    th:onclick="|window.location.href='@{/user}/${userEntity.id}'|">
+                                    <td>
+                                        <div style="width: 50px; height: 50px; position: relative; display: inline-block;">
+                                            <img th:if="${userEntity.profilePicture != null}" th:src="@{'/' + ${userEntity.profilePicturePath}}" width="100%" height="100%" alt="Profile Picture" class="rounded-circle" style="z-index: 1; position: relative; object-fit: cover;">
+                                            <img th:if="${userEntity.profilePicture == null}" th:src="@{/images/defaultPicture.png}" width="100%" height="100%" alt="Profile Picture" class="rounded-circle" style="z-index: 1; position: relative;">
+                                            <img th:if="${userEntity.border?.path}" th:src="@{${userEntity.border?.path}}" class="position-absolute" width="66px" height="auto" style="z-index: 2; left: -8px; top: -8px;">
+                                        </div>
+                                    </td>
+                                    <td class="align-middle"><span class="text-dark"
+                                                                   th:text="${userEntity.firstName + ' ' + userEntity.lastName}"></span>
+                                    </td>
+                                    <td class="align-middle">
+                                        <select class="form-select bg-light text-dark border-dark" id="roleSelect"
+                                                style="display: none" th:name="__${userEntity.id}__">
+                                            <option th:selected="${team.getUserRole(userEntity) == 'manager'}"
+                                                    value="manager">
+                                                Manager
+                                            </option>
+                                            <option th:selected="${team.getUserRole(userEntity) == 'coach'}"
+                                                    value="coach">Coach
+                                            </option>
+                                            <option th:selected="${team.getUserRole(userEntity) == 'member'}"
+                                                    value="member">Member
+                                            </option>
+                                        </select>
+                                        <p class="text-dark roleText"
+                                           style="display: block"
+                                           th:text="${#strings.capitalize(team.getUserRole(userEntity))}"></p>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            <div class="d-flex justify-content-between" th:unless="${team.getUserRole(user) == ''}">
+                                <a id="view-activities-button" th:href="@{/activity/team/} + ${team.id}">
+                                    <button class="btn btn-outline-dark" type="button">View Team
+                                        Activities
+                                    </button>
+                                </a>
+                                <div th:if="${team.getUserRole(user) == 'manager'}">
+                                    <button class="btn btn-primary" id="saveMemberRolesBtn" style="visibility: hidden"
+                                            type="submit">Save
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                        <div th:if="${#lists.isEmpty(users)}">
+                            <td class="text-center" colspan="4">No members found.</td>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div aria-hidden="true" aria-labelledby="locationModalLabel" class="modal fade" id="locationModal"
+         tabindex="-1" th:if="${team.location}">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="locationModalLabel">Edit Location</h5>
+                </div>
+                <form id="locationForm" method="post" th:action="@{/teams/{teamId}/edit-location(teamId=${team.id})}"
+                      th:object="${location}">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label class="form-label" for="addressLine1">Address Line 1:</label>
+                            <input class="form-control" id="addressLine1"
+                                   th:field="*{addressLine1}"
+                                   th:oninput=suggestAddress([[@{/locationSuggest}]]) type="text">
+                        </div>
+                        <p class="alert alert-danger therror"
+                           th:if="${fieldErrors != null && #maps.containsKey(fieldErrors, 'addressLine1')}" th:text="${fieldErrors['addressLine1']}"></p>
+                        <div class="form-group">
+                            <label class="form-label" for="addressLine2">Address Line 2:</label>
+                            <input class="form-control" id="addressLine2" th:field="*{addressLine2}" type="text">
+                        </div>
+                        <p class="alert alert-danger therror"
+                           th:if="${fieldErrors != null && #maps.containsKey(fieldErrors, 'addressLine2')}" th:text="${fieldErrors['addressLine2']}"></p>
+                        <div class="form-group">
+                            <label class="form-label" for="suburb">Suburb:</label>
+                            <input class="form-control" id="suburb" th:field="*{suburb}" type="text">
+                        </div>
+                        <p class="alert alert-danger therror"
+                           th:if="${fieldErrors != null && #maps.containsKey(fieldErrors, 'suburb')}" th:text="${fieldErrors['suburb']}"></p>
+                        <div class="form-group">
+                            <label class="form-label" for="postcode">Postcode:</label>
+                            <input class="form-control" id="postcode" th:field="*{postcode}" type="text">
+                        </div>
+                        <p class="alert alert-danger therror"
+                           th:if="${fieldErrors != null && #maps.containsKey(fieldErrors, 'postcode')}" th:text="${fieldErrors['postcode']}"></p>
+                        <div class="form-group">
+                            <label class="form-label" for="city">City:</label>
+                            <input class="form-control" id="city" placeholder="Required"
+                                   th:field="*{city}" type="text">
+                        </div>
+                        <p class="alert alert-danger therror"
+                           th:if="${fieldErrors != null && #maps.containsKey(fieldErrors, 'city')}" th:text="${fieldErrors['city']}"></p>
+                        <div class="form-group">
+                            <label class="form-label" for="country">Country:</label>
+                            <input class="form-control" id="country" placeholder="Required"
+                                   th:field="*{country}" type="text">
+                        </div>
+                        <p class="alert alert-danger therror"
+                           th:if="${fieldErrors != null && #maps.containsKey(fieldErrors, 'country')}" th:text="${fieldErrors['country']}"></p>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-outline-danger" data-bs-dismiss="modal" type="button">Close</button>
+                        <button class="btn btn-primary" type="submit">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div aria-hidden="true" aria-labelledby="teamInvitationTokenModalLabel"
+                             class="modal fade token-modal"
+                             id="teamInvitationTokenModal" tabindex="-1">
+                            <div class="modal-dialog">
+                                <div class="modal-content bg-light justify-content-center">
+                                    <div class="modal-header border-dark">
+                                        <h5 class="modal-title justify-content-center"
+                                            id="teamInvitationTokenModalLabel">Team Invitation Token</h5>
+                                        <button aria-label="Close" data-bs-dismiss="modal" id="closeButton"
+                                                type="button">&#x2715;
+                                        </button>
+                                    </div>
+                                    <div class="modal-body text-center align-content-center">
+                                        <h4 id="teamInvitationToken" th:text="${team.getJoinToken()}"></h4>
+                                        <button class="btn btn-dark"
+                                                th:onclick="'generateNewToken(\''+@{/generateToken}+'\')'"
+                                                type="button">
+                                            Regenerate Token
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+</div>
+
+<script>
+
+    const showLocationModal = () => {
+        const modalId = "[[${modalId}]]";
+        if (modalId) {
+            const modalElement = document.getElementById('locationModal');
+            const modal = new bootstrap.Modal(modalElement);
+
+            modalElement.addEventListener('shown.bs.modal', function () {
+                const modalTitle = modalElement.querySelector('.modal-title');
+                modalTitle.focus();
+            })
+
+            modal.show();
+        }
+    }
+
+    showLocationModal();
+</script>
+
+<script>
+    const enableEdit = () => {
+        toggleVisibility(".edit-details", false);
+        toggleVisibility(".normal-details", true);
+    }
+
+    const cancelEdit = () => {
+        toggleVisibility(".edit-details", true);
+        toggleVisibility(".normal-details", false);
+    }
+
+    const toggleVisibility = (selector, isHidden) => {
+        const divs = document.querySelectorAll(selector);
+        divs.forEach(div => {
+            div.hidden = isHidden;
+        });
+    }
+
+</script>
+
+<script>
+    const editMemberRolesDiv = document.getElementById("editMemberRolesDiv");
+
+    function checkDisplay() {
+        let errors = "[[${formErrorRoles}]]";
+        if (errors !== "") {
+            editMemberRolesDiv.style.display = "block";
+        }
+    }
+</script>
+
+<script>
+    const teamToken = document.getElementById("teamToken");
+
+    function displayToken() {
+        teamToken.style.filter = "none";
+        teamToken.style.userSelect = "auto";
+    }
+</script>
+
+<script th:inline="javascript">
+    async function generateNewToken(tokenPath) {
+        tokenPath = tokenPath + "?id=[[${team.id}]]"
+        document.getElementById("teamInvitationToken").innerText = await (await fetch(tokenPath)).json();
+    }
+</script>
+
+<script>
+    function selectImage(input) {
+        const fileSize = input.files[0].size / 1000 / 1000; // in MB
+        if (fileSize > 10) {
+            input.value = null;
+            document.getElementById('imageErrorJs').innerText = "File cannot exceed 10MB";
+            document.getElementById('imageErrorJs').style.display = "block";
+        } else {
+            document.getElementById('imageErrorJs').innerText = "";
+            document.getElementById('imageErrorJs').style.display = "none";
+        }
+    }
+</script>
+
+<script th:inline="javascript">
+    const uploadBtn = document.getElementById('upload');
+
+    if (uploadBtn !== null) {
+        uploadBtn.addEventListener('submit', function (e) {
+            var files = document.getElementById('file').files;
+            if (files.length === 0) {
+                e.preventDefault();
+                var fileName = document.getElementById('fileName');
+                fileName.innerHTML = "No file selected"
+            }
+        });
+    }
+
+    function changeFileName() {
+        var fileInput = document.getElementById('file');
+        var fileName = document.getElementById('fileName');
+        fileName.innerHTML = fileInput.files[0].name;
+    }
+
+</script>
+
+<script>
+    function checkAlert() {
+        let updated = "[[${updatedRoles}]]";
+        if (updated) {
+            setTimeout(() => {
+                document.getElementById("memberRoleSaveAlert").style.visibility = "hidden";
+            }, 5000);
+        }
+    }
+</script>
+
+<!-- Script for changing member roles from text to selects when clicking edit roles button -->
+<script>
+    document.getElementById('editRolesButton').addEventListener('click', function () {
+        var selects = document.querySelectorAll('#roleSelect');
+        var paragraphs = document.querySelectorAll('.roleText');
+
+        // Toggle display of selects and paragraphs
+        selects.forEach(function (select) {
+            select.style.display = (select.style.display === 'none') ? 'block' : 'none';
+        });
+        paragraphs.forEach(function (paragraph) {
+            paragraph.style.display = (paragraph.style.display === 'block') ? 'none' : 'block';
+        });
+
+        // Show save button
+        document.getElementById('saveMemberRolesBtn').style.visibility = (document.getElementById('saveMemberRolesBtn').style.visibility === 'hidden') ? 'visible' : 'hidden';
+    });
+</script>
+
+<script>
+    function validateUpload(input) {
+        if (input.files && input.files[0]) {
+            const image = input.files[0];
+            const fileSize = image.size / 1024 / 1024; // in MB
+            if (fileSize > 10) {
+                input.value = null;
+                document.querySelector('#image-error-msg').innerText = 'File cannot exceed 10MB';
+                document.querySelector('#image-error-msg').style.visibility = 'visible';
+            } else {
+                const allowedExtensions = ['svg', 'png', 'jpg', 'jpeg'];
+                const fileExtension = image.name.split('.').pop().toLowerCase();
+                if (!allowedExtensions.includes(fileExtension)) {
+                    input.value = null;
+                    document.querySelector('#image-error-msg').innerText = 'Invalid file type. Accepted file types are .svg, .png, .jpg, .jpeg';
+                    document.querySelector('#image-error-msg').style.visibility = 'visible';
+                } else {
+                    document.querySelector('#image-error-msg').innerText = '';
+                    document.querySelector('#image-error-msg').style.visibility = 'hidden';
+                    let reader = new FileReader();
+                    reader.onload = function (e) {
+                        document.querySelector('#imagePreview').src = e.target.result;
+                        document.querySelector('#imagePreview').style.display = 'block';
+                        document.querySelector('#confirmChange').style.display = 'block';
+                        document.querySelector('#cancelChange').style.display = 'block';
+                    }
+                    reader.readAsDataURL(input.files[0]);
+                }
+            }
+        }
+    }
+
+    document.querySelector("#imageUpload").addEventListener('change', function() {
+        validateUpload(this);
+    });
+
+    document.querySelector('#image-error-msg').addEventListener('change', function () {
+        document.querySelector('#image-error-msg').style.visibility = 'visible';
+    });
+
+</script>
+
+<script th:inline="javascript">
+
+    const path = /*[[@{/api/follow}]]*/ "";
+    const teamId = '[[${team.id}]]';
+    let isFollowed = /*[[${isFollowed}]]*/ false;
+
+    let token = document.querySelector('meta[name="_csrf"]').getAttribute("content");
+    const headerName = document.querySelector('meta[name="_csrf_header"]').getAttribute("content");
+
+    document.addEventListener("DOMContentLoaded", function() {
+        initializeFollowButton();
+        attachFollowButtonListener();
+    });
+
+    const initializeFollowButton = () => {
+        const followButton = document.getElementById("followButton");
+        followButton.innerText = isFollowed ? "Unfollow" : "Follow";
+    };
+
+    const attachFollowButtonListener = () => {
+        const followButton = document.getElementById("followButton");
+        followButton.addEventListener("click", async function() {
+            try {
+                const response = await fetch(`${path}/team/${teamId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        [headerName]: token
+                    }
+                });
+                if (response.ok) {
+                    isFollowed = !isFollowed;
+                    this.innerText = isFollowed ? "Unfollow" : "Follow";
+                } else {
+                    console.error('Failed to toggle follow status for team');
+                }
+            } catch (error) {
+                console.error('An error occurred:', error);
+            }
+        });
+    };
+</script>
+
+</body>
+</html>

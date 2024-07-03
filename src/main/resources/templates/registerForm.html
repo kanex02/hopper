@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://thymeleaf.org">
+<head>
+    <script th:src="@{/webjars/bootstrap/5.1.3/js/bootstrap.min.js}"></script>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/styles.css}">
+    <meta http-equiv="Content-Type" context="text/html; charset=UTF-8">
+    <title>Register | TAB</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.1.3/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/custom.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/css/navbar.css}">
+    <script th:src="@{/js/location_suggest.js}"></script>
+</head>
+<body>
+<div class="d-flex flex-column vh-100 bg-dark">
+    <div th:replace="~{fragments/navbar :: navbar}" class="flex-shrink-0"></div>
+    <div class="container-fluid main-content flex-grow-1">
+        <div class="row justify-content-center align-items-center h-100">
+            <div class="col-lg-6">
+                <div class="card bg-light text-dark mb-3 py-4 fixed-card justify-content-center rounded-form shadow">
+                    <div class="row h-100 g-0">
+                        <div class="col-md-5 border-end border-dark d-flex align-items-center justify-content-center">
+                            <div class="card-body d-flex flex-column justify-content-center">
+                                <h1 class="display-6 card-title text-center">HOPPER.</h1>
+                                <h5 class="lead card-text text-center mt-3 mb-2">Already have an account?</h5>
+                                <div class="text-center">
+                                    <a th:href="@{login}" class="btn btn-outline-dark w-50">Login</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-7">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-1 col-lg-2"></div>
+                                    <div class="col-10 col-lg-8">
+                                        <form th:action="@{/register}" method="post" th:object="${userRegister}"
+                                              enctype="multipart/form-data">
+                                            <fieldset>
+                                                <div class="row g-3 mb-3">
+                                                    <div class="col-sm-6">
+                                                        <label for="firstName">First Name</label>
+                                                        <input type="text"
+                                                               th:class="${#fields.hasErrors('firstName')} ? 'form-control bg-transparent text-dark is-invalid' : 'form-control bg-transparent border-dark text-dark'"
+                                                               id="firstName" name="firstName" th:value="*{firstName}"
+                                                               placeholder="John"/>
+                                                        <div th:if="${#fields.hasErrors('firstName')}"
+                                                             class="invalid-feedback">
+                                                            <div th:errors="*{firstName}"></div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <label for="lastName">Last Name</label>
+                                                        <input type="text"
+                                                               th:class="${#fields.hasErrors('lastName')} ? 'form-control bg-transparent text-dark is-invalid' : 'form-control bg-transparent border-dark text-dark'"
+                                                               id="lastName" name="lastName" placeholder="Doe" th:value="*{lastName}"/>
+                                                        <div th:if="${#fields.hasErrors('lastName')}"
+                                                             class="invalid-feedback">
+                                                            <div th:errors="*{lastName}"></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="email">Email</label>
+                                                    <input type="text"
+                                                           th:class="${#fields.hasErrors('email')} ? 'form-control bg-transparent text-dark is-invalid' : 'form-control bg-transparent border-dark text-dark'"
+                                                           id="email" name="email" placeholder="johndoe@example.com" th:value="*{email}"/>
+                                                    <div th:if="${#fields.hasErrors('email')}" class="invalid-feedback">
+                                                        <div th:errors="*{email}"></div>
+                                                    </div>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="dateOfBirth">Date of Birth</label>
+                                                    <input type="date"
+                                                           th:class="${#fields.hasErrors('dateOfBirth')} ? 'form-control bg-transparent text-dark is-invalid' : 'form-control bg-transparent border-dark text-dark'"
+                                                           id="dateOfBirth" name="dateOfBirth" th:value="*{dateOfBirth}"
+                                                    />
+                                                    <div th:if="${#fields.hasErrors('dateOfBirth')}"
+                                                         class="invalid-feedback">
+                                                        <div th:errors="*{dateOfBirth}"></div>
+                                                    </div>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="password">Password
+                                                        <div class="tooltip-container">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16"
+                                                                 height="16" fill="currentColor"
+                                                                 class="bi bi-question-circle" viewBox="0 0 16 16">
+                                                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                                                <path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z"/>
+                                                            </svg>
+                                                            <div class="tooltip-text">Password must be at least 8
+                                                                characters long, and contain a mix of lower case, upper
+                                                                case, digits, and special characters, and not contain
+                                                                information from any other fields.
+                                                            </div>
+                                                        </div>
+                                                    </label>
+                                                    <input type="password"
+                                                           th:class="${passwordPasswordError} ? 'form-control bg-transparent text-dark is-invalid' : 'form-control bg-transparent border-dark text-dark'"
+                                                           id="password" name="password" placeholder="Password" th:value="*{password}"/>
+                                                    <div th:if="${passwordPasswordError}"
+                                                         class="invalid-feedback">
+                                                        <div th:text="${passwordPasswordError}"></div>
+                                                    </div>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="confirmPassword">Confirm Password</label>
+                                                    <input type="password"
+                                                           th:class="${passwordConfirmError} ? 'form-control bg-transparent text-dark is-invalid' : 'form-control bg-transparent border-dark text-dark'"
+                                                           id="confirmPassword" name="confirmPassword" th:value="*{confirmPassword}"
+                                                           placeholder="Password"/>
+                                                    <div th:if="${passwordConfirmError}"
+                                                         class="invalid-feedback">
+                                                        <div th:text="${passwordConfirmError}"></div>
+                                                    </div>
+                                                </div>
+                                            </fieldset>
+                                            <div class="text-center">
+                                                <button class="btn btn-primary w-50" type="submit">Register
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div class="col-1 col-lg-2"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" context="text/html; charset=UTF-8">
+    <title>Register</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/navbar.css}">
+</head>
+<body>
+
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<h1>Security Example Application Using Spring Security</h1>
+
+<h3>Admin page</h3>
+
+<h2 th:text="'Your request has the following authorities: ' + ${authorities}"></h2>
+
+</body>
+</html>

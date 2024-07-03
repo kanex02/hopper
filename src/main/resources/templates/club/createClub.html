@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" context="text/html; charset=UTF-8">
+    <title>Teams | TAB</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.1.3/css/bootstrap.min.css}">
+    <link th:href="@{/css/styles.css}" rel="stylesheet">
+    <link th:href="@{/css/createClub.css}" rel="stylesheet">
+    <script th:src="@{/js/location_suggest.js}"></script>
+    <link th:href="@{/css/custom.css}" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" th:href="@{/css/navbar.css}">
+    <meta http-equiv="Content-Type" context="text/html; charset=UTF-8">
+</head>
+<body class="bg-dark">
+<script th:inline="javascript" th:src="@{/js/multiselect-dropdown.js}" ></script>
+<script th:src="@{/webjars/bootstrap/5.1.3/js/bootstrap.min.js}"></script>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+<div class="container-fluid main-content p-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 card bg-light rounded-form shadow p-5">
+            <div class="form-group">
+                <h2>Register a Club</h2>
+                <hr>
+                <form th:action="@{/club/create}" autocomplete="off" id="create-club-form"
+                      method="post" th:object="${club}" enctype="multipart/form-data">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="id">
+                                <input type="hidden" th:field="*{id}">
+                            </div>
+
+                            <div class="avatar-upload">
+                                <div class="avatar-preview">
+                                    <div id="imagePreview"
+                                         th:style="'background-image: url(' + @{/images/defaultClubPicture.png} + ');'">
+                                    </div>
+                                </div>
+                                <div class="avatar-edit">
+                                    <input type='file' id="imageUpload" accept=".png, .jpg, .jpeg" name="imageUpload"/>
+                                    <label for="imageUpload" th:style="'--image: url(\'' + @{/images/pencil-square.svg} + '\')'"></label>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="name">Club Name:*
+                                    <div class="tooltip-container">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16"
+                                             height="16" fill="currentColor"
+                                             class="bi bi-question-circle" viewBox="0 0 16 16">
+                                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                            <path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z"/>
+                                        </svg>
+                                        <div class="tooltip-text">
+                                            Name must be made of alphanumeric characters, dots, apostrophes and curly braces only, and it must be at least 3 characters and at most 50 characters long.
+                                        </div>
+                                    </div></label>
+                                <br>
+                                <input id="name" type="text" th:field="*{name}"
+                                       th:class="${#fields.hasErrors('name')} ? 'form-control bg-transparent text-dark is-invalid' : 'form-control bg-transparent border-dark text-dark'"
+                                       placeholder="Required" data-cy="name"/>
+                                <p th:if="${#fields.hasErrors('name')}" th:errorclass="therror" th:errors="*{name}"
+                                   class="invalid-feedback">
+
+                                </p>
+                            </div>
+
+                            <br>
+
+                            <div>
+                                <label for="description">Club Description:*
+                                    <div class="tooltip-container">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16"
+                                             height="16" fill="currentColor"
+                                             class="bi bi-question-circle" viewBox="0 0 16 16">
+                                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                            <path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z"/>
+                                        </svg>
+                                        <div class="tooltip-text">
+                                            Description should be at least one character and not be longer than 150 characters.
+                                        </div>
+                                    </div>
+                                </label>
+                                <br>
+                                <textarea id="description"
+                                          th:class="${#fields.hasErrors('description')} ? 'form-control bg-transparent text-dark is-invalid' : 'form-control bg-transparent border-dark text-dark'"
+                                          th:field="*{description}"
+                                          data-cy="description"
+                                          placeholder="Required">
+                        </textarea>
+                                <p th:if="${#fields.hasErrors('description')}" th:errorclass="therror"
+                                   th:errors="*{description}"
+                                   class="invalid-feedback"></p>
+                            </div>
+
+                            <br>
+
+                            <div>
+                                <label>Sport:</label>
+                                <select class="form-select border-dark" name="sport" id="sportSelect" onchange="validateSportAndTeam()"
+                                        th:class="${sportError != null} ? 'form-select bg-transparent is-invalid' : 'form-select bg-transparent border-dark'">
+                                    <option value="" disabled th:selected="${selectedSport == null}"> Select your option</option>
+                                    <option th:each="sport : ${sports}" th:value="${sport.id}"
+                                            th:selected="${#strings.equals(selectedSport, #strings.toString(sport.id))}"
+                                            th:text="${sport.name}"></option>
+                                </select>
+                                <p th:if="${sportError != null}"
+                                   th:text="${sportError}" class="text-danger"></p>
+                                <p id="sportMismatchError" hidden class="invalid-feedback mb-0">
+                                    The selected teams do not match the club's sport.
+                                </p>
+                            </div>
+
+                            <br>
+
+                            <div>
+                                <label>Teams to manage:</label>
+                                <div class="d-flex flex-wrap gap-2 mb-3" id="team-list-div" style="max-height: 130px; overflow-y: auto">
+                                    <h4 class="mb-0"><span class="badge bg-info">No Teams Selected</span></h4>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <select id="teamsSelect" placeholder="Select Teams"
+                                            th:if="${!teams.isEmpty()}" class="form-select border-dark">
+                                        <option th:each="team : ${teams}" th:value="${team.id}"
+                                                th:text="${team.teamName}" th:data-sport="${team.sport.id}"
+                                                th:data-has-club="${team.club != null}"></option>
+                                    </select>
+                                    <button id="add-team-button" class="btn btn-primary flex-shrink-0" type="button" onclick="addTeam()">Add team</button>
+                                </div>
+                                <p id="teamSportMismatchError" hidden class="invalid-feedback mb-0">
+                                    The selected team does not match the club's sport.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="location col-lg-6 mt-5" th:object="${location}">
+                            <h5>Location</h5>
+
+                            <div class="address-line-1">
+                                <label for="addressLine1">Address:</label><br>
+                                <div class="autocomplete">
+                                    <input type="text"
+                                           th:class="${#fields.hasErrors('addressLine1')} ? 'form-control bg-transparent text-dark is-invalid' : 'form-control bg-transparent border-dark text-dark'" id="addressLine1"
+                                           placeholder="Optional"
+                                           th:oninput=suggestAddress([[@{/locationSuggest}]])
+                                           th:field="*{addressLine1}" data-cy="addressLine1" autofocus>
+                                </div>
+                                <p th:if="${#fields.hasErrors('addressLine1')}" th:errorclass="therror"
+                                   th:errors="*{addressLine1}" class="invalid-feedback"></p>
+                            </div>
+
+                            <div class="address-line-2">
+                                <input type="text"
+                                       th:class="${#fields.hasErrors('addressLine2')} ? 'form-control bg-transparent text-dark is-invalid' : 'form-control bg-transparent border-dark text-dark'" id="addressLine2"
+                                       placeholder="Optional"
+                                       th:field="*{addressLine2}" data-cy="addressLine2" autofocus>
+                                <p th:if="${#fields.hasErrors('addressLine2')}" th:errorclass="therror"
+                                   th:errors="*{addressLine2}" class="invalid-feedback"></p>
+                            </div>
+
+                            <br>
+
+                            <div class="suburb">
+                                <label for="suburb">Suburb:</label>
+                                <input type="text"
+                                       th:class="${#fields.hasErrors('suburb')} ? 'form-control bg-transparent text-dark is-invalid' : 'form-control bg-transparent border-dark text-dark'" id="suburb" placeholder="Optional"
+                                       th:field="*{suburb}" data-cy="suburb" autofocus>
+                                <p th:if="${#fields.hasErrors('suburb')}" th:errorclass="therror" th:errors="*{suburb}"
+                                   class="invalid-feedback"></p>
+                            </div>
+
+                            <br>
+
+                            <div class="city">
+                                <label for="city">City:*</label>
+                                <input type="text"
+                                       th:class="${#fields.hasErrors('city')} ? 'form-control bg-transparent text-dark is-invalid' : 'form-control bg-transparent border-dark text-dark'"
+                                       id="city" placeholder="Required" th:field="*{city}" data-cy="city" autofocus>
+                                <p th:if="${#fields.hasErrors('city')}" th:errorclass="therror" th:errors="*{city}"
+                                   class="invalid-feedback"></p>
+                            </div>
+
+                            <br>
+
+                            <div class="postcode">
+                                <label for="postcode">Postcode:</label>
+                                <input type="text"
+                                       th:class="${#fields.hasErrors('postcode')} ? 'form-control bg-transparent text-dark is-invalid' : 'form-control bg-transparent border-dark text-dark'" id="postcode" placeholder="Optional"
+                                       th:field="*{postcode}" data-cy="postcode" autofocus>
+                                <p th:if="${#fields.hasErrors('postcode')}" th:errorclass="therror"
+                                   th:errors="*{postcode}"
+                                   class="invalid-feedback"></p>
+                            </div>
+
+                            <br>
+
+                            <div class="country">
+                                <label for="country">Country:*</label>
+                                <input type="text"
+                                       th:class="${#fields.hasErrors('country')} ? 'form-control bg-transparent text-dark is-invalid' : 'form-control bg-transparent border-dark text-dark'" id="country" placeholder="Required"
+                                       th:field="*{country}" data-cy="country" autofocus>
+                                <p th:if="${#fields.hasErrors('country')}" th:errorclass="therror"
+                                   th:errors="*{country}"
+                                   class="invalid-feedback"></p>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div id="button_div" class="text-center">
+                        <button type="button" id="form-submit-btn" onclick="submitForm(this)" class="btn btn-primary">Create Club</button>
+                        <a>
+                            <button class="btn btn-outline-danger" type="button" th:onclick="|window.location.href=@{'/'}|">Cancel</button>
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+</script>
+
+<script th:inline="javascript">
+    MultiselectDropdown(window.MultiselectDropdownOptions);
+</script>
+
+<script th:inline="javascript">
+    function readURL(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                document.querySelector('#imagePreview').style.backgroundImage = 'url('+e.target.result +')';
+                document.querySelector('#imagePreview').style.display = 'none';
+                document.querySelector('#imagePreview').style.display = 'block';
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    document.querySelector("#imageUpload").addEventListener('change', function() {
+        readURL(this);
+    });
+</script>
+
+</body>
+
+<script th:inline="javascript">
+const teamListDiv = document.getElementById("team-list-div")
+const teamSelect = document.getElementById("teamsSelect")
+const sportSelect = document.getElementById("sportSelect")
+const teamSportMismatchError = document.getElementById("teamSportMismatchError")
+const sportMismatchError = document.getElementById("sportMismatchError")
+const addTeamButton = document.getElementById("add-team-button")
+const formSubmitButton = document.getElementById("form-submit-btn")
+let teamList = []
+
+function validateSportAndTeam() {
+    var selectedSport = sportSelect.value;
+
+    sportMismatchError.hidden = true;
+
+    formSubmitButton.disabled = false;
+    addTeamButton.disabled = false;
+
+    // Checking if there is a mismatch between team's sport and selected sport
+    for(var i = 0; i < teamList.length; i++) {
+        if(teamList[i][2] !== selectedSport) {
+            sportMismatchError.hidden = false;
+            sportMismatchError.style.display = 'block'
+            formSubmitButton.disabled = true;
+            addTeamButton.disabled = true;
+            break;
+        }
+    }
+}
+
+const addTeam = () => {
+    let team = teamSelect.options[teamSelect.selectedIndex]
+    teamSportMismatchError.hidden = true;
+    teamSportMismatchError.style.display = 'none';
+    sportSelect.classList.add("border-dark")
+    sportSelect.classList.remove("border-danger")
+    //validation
+    if (teamList.find(searchTeam => searchTeam[0] === team.value)) return;
+    if (team.getAttribute("data-has-club") === 'true') {
+        teamSportMismatchError.innerText = "The selected team already belongs to a club."
+        teamSportMismatchError.hidden = false;
+        teamSportMismatchError.style.display = 'block'
+        return;
+    }
+    if (sportSelect.value !== team.getAttribute("data-sport")) {
+        sportSelect.classList.remove("border-dark")
+        sportSelect.classList.add("border-danger")
+        teamSportMismatchError.innerText = "The selected team does not match the club's sport."
+        teamSportMismatchError.hidden = false;
+        teamSportMismatchError.style.display = 'block'
+        return;
+    }
+
+    team.disabled = true
+    teamList.push([team.value, team.text, team.getAttribute("data-sport")])
+    updateList()
+}
+
+const updateList = ()=> {
+    teamListDiv.innerHTML = '';
+    teamList.forEach((team) => teamListDiv.innerHTML +=
+       `<h4 class='mb-0'>
+            <span class='badge bg-primary'>${team[1]}
+                <span onclick='remove(${team[0]})' class="bg-transparent shadow-none" style="cursor: pointer;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle" viewBox="0 0 16 16">
+                  <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                  <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                </svg>
+                </span>
+            </span>
+        </h4>`
+    )
+
+    if (teamList.length === 0) {
+        teamListDiv.innerHTML = `<h4 class="mb-0"><span class="badge bg-info">No Teams Selected</span></h4>`
+    }
+}
+
+const remove = (teamId) => {
+    teamList = teamList.filter(team => {
+        return !(team[0] === teamId.toString())
+    })
+    for (let i = 0; i < teamSelect.options.length; i++) {
+        let team = teamSelect.options[i]
+        if (team.value === teamId.toString()) {
+            team.disabled = false
+        }
+
+    }
+    updateList()
+    validateSportAndTeam()
+}
+
+const submitForm = (button) => {
+    const createClubForm = document.getElementById('create-club-form')
+    teamList.forEach(team => {
+        let input = document.createElement("input");
+        input.hidden = true;
+        input.name = "team";
+        input.type = "number";
+        input.value = team[0];
+        createClubForm.appendChild(input)
+    })
+
+    createClubForm.submit()
+}
+
+
+let selectedTeams = /*[[${selectedTeams}]]*/ []
+
+if (selectedTeams === null) selectedTeams = []
+
+selectedTeams.forEach(teamId => {
+    for (let i = 0; i < teamSelect.options.length; i++) {
+        let team = teamSelect.options[i]
+        if (team.value === teamId.toString()) {
+            team.disabled = true
+            teamList.push([String(teamId), team.text, team.getAttribute("data-sport")])
+            break
+        }
+    }
+})
+
+
+
+updateList()
+</script>
+
+</html>

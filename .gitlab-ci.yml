@@ -1,0 +1,100 @@
+stages:
+  - tagChecking
+  - build
+  - test
+  - sonarqube
+  - deploy
+
+tag-checker:
+  stage: tagChecking
+  script:
+    - python3 tag_checker.py $CI_COMMIT_TAG
+  only:
+    - tags
+
+junit:
+  stage: test
+  script:
+    - ./gradlew test
+  artifacts:
+    paths:
+      - build/jacoco/test-report.xml
+
+cucumber:
+  stage: test
+  script:
+    - ./gradlew acceptanceTest
+
+# builds all branches, except dev and master
+branch-build:
+  stage: build
+  script:
+    - ./gradlew bootJar
+  artifacts:
+    paths:
+      - build/libs
+  except:
+    - tags
+    - master
+    - dev
+
+deploy-staging:
+  stage: deploy
+  script:
+    - ./gradlew bootJar
+    - rm -rf /home/gitlab-runner/staging/ || true
+    - mkdir /home/gitlab-runner/staging/
+    - cp -r ./build/libs /home/gitlab-runner/staging
+    - cp runner-scripts/staging.sh /home/gitlab-runner/staging.sh
+    - chmod u+x /home/gitlab-runner/staging.sh
+    - echo "export DB_USERNAME=${DB_USERNAME}" > /home/gitlab-runner/staging/.env
+    - echo "export DB_PASSWORD=${DB_PASSWORD}" >> /home/gitlab-runner/staging/.env
+    - echo "export LOCATION_API_KEY=${LOCATION_API_KEY}" >> /home/gitlab-runner/staging/.env
+    - echo "export MAIL_USERNAME=${MAIL_USERNAME}" >> /home/gitlab-runner/staging/.env
+    - echo "export MAIL_PASSWORD=${MAIL_PASSWORD}" >> /home/gitlab-runner/staging/.env
+    - sudo systemctl restart staging-tab
+  artifacts:
+    paths:
+      - build/libs
+  only:
+    - dev
+
+deploy-production:
+  stage: deploy
+  script:
+    - ./gradlew bootJar
+    - rm -rf /home/gitlab-runner/production/ || true
+    - mkdir /home/gitlab-runner/production/
+    - cp -r ./build/libs /home/gitlab-runner/production
+    - cp runner-scripts/production.sh /home/gitlab-runner/production.sh
+    - chmod u+x /home/gitlab-runner/production.sh
+    - echo "export DB_USERNAME=${DB_USERNAME}" > /home/gitlab-runner/production/.env
+    - echo "export DB_PASSWORD=${DB_PASSWORD}" >> /home/gitlab-runner/production/.env
+    - echo "export LOCATION_API_KEY=${LOCATION_API_KEY}" >> /home/gitlab-runner/production/.env
+    - echo "export MAIL_USERNAME=${MAIL_USERNAME}" >> /home/gitlab-runner/production/.env
+    - echo "export MAIL_PASSWORD=${MAIL_PASSWORD}" >> /home/gitlab-runner/production/.env
+    - sudo systemctl restart production-tab
+  artifacts:
+    paths:
+      - build/libs
+  only:
+    - tags
+
+sonarqube-report:
+  stage: sonarqube
+  script:
+    ./gradlew sonarqube
+
+# From https://docs.sonarsource.com/sonarqube/latest/devops-platform-integration/gitlab-integration/
+sonarqube-check:
+  stage: sonarqube
+  image: gradle:8.2.0-jdk17-jammy
+  variables:
+    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
+    GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
+  cache:
+    key: "${CI_JOB_NAME}"
+    paths:
+      - .sonar/cache
+  script: ./gradlew sonarqube -Dsonar.qualitygate.wait=true
+  allow_failure: true

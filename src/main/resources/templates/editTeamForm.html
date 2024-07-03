@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" context="text/html; charset=UTF-8">
+    <title>Edit Team</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.1.3/css/bootstrap.min.css}">
+    <link th:href="@{/css/styles.css}" rel="stylesheet">
+    <link th:href="@{/css/createTeam.css}" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" th:href="@{/css/navbar.css}">
+    <script th:src="@{/js/location_suggest.js}"></script>
+    <script th:src="@{/webjars/bootstrap/5.1.3/js/bootstrap.min.js}"></script>
+</head>
+<body>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-3"></div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <form id="submitForm" th:action="@{/edit_team/{teamId}(teamId=${teamId})}" method="post" th:object="${team}"
+                      onsubmit="return submitForm()" enctype="multipart/form-data">
+
+                    <div class="id">
+                        <input type="hidden" th:field="*{id}">
+                    </div>
+
+                    <div class="team-name">
+                        <label for="teamName">Team name:*</label>
+                        <input type="text" class="form-control" id="teamName" placeholder="Name" onchange=hasChanged()
+                               th:field="*{teamName}" data-cy="teamName" autofocus><br>
+                        <p th:if="${#fields.hasErrors('teamName')}" th:errorclass="therror" th:errors="*{teamName}"></p>
+                    </div>
+
+                    <div class="sport">
+                        <label for="sportSelect">Sport:*</label>
+                        <select class="form-select border-dark" name="sport" id="sportSelect"
+                                th:class="${sportError != null} ? 'form-select bg-transparent is-invalid' : 'form-select bg-transparent border-dark'"
+                                onchange="sportChanged();">
+                            <option value="" disabled th:selected="${team.sport.id == null}"> Select your option</option>
+                            <option th:each="sport : ${sports}" th:value="${sport.id}"
+                                    th:selected="${sport.id == team.sport.id}"
+                                    th:text="${sport.name}"></option>
+                        </select>
+
+                    </div>
+
+                    <div class="location" th:object="${location}">
+                        <div class="address-line-1">
+                            <label for="addressLine1">Address:</label>
+                            <div class="autocomplete">
+                                <input type="text" class="form-control" id="addressLine1" placeholder="Optional"
+                                       onchange=hasChanged()
+                                       th:oninput=suggestAddress([[@{/locationSuggest}]])
+                                       th:field="*{addressLine1}" data-cy="addressLine1" autofocus>
+                            </div>
+                            <p th:if="${#fields.hasErrors('addressLine1')}" th:errorclass="therror"
+                               th:errors="*{addressLine1}"></p>
+                        </div>
+
+                        <br>
+
+                        <div class="address-line-2">
+                            <input type="text" class="form-control" id="addressLine2" placeholder="Optional"
+                                   onchange=hasChanged()
+                                   th:field="*{addressLine2}" data-cy="addressLine2" autofocus>
+                            <p th:if="${#fields.hasErrors('addressLine2')}" th:errorclass="therror"
+                               th:errors="*{addressLine2}"></p>
+                        </div>
+
+                        <br>
+
+                        <div class="suburb">
+                            <label for="suburb">Suburb:</label>
+                            <input type="text" class="form-control" id="suburb" placeholder="Optional"
+                                   onchange=hasChanged()
+                                   th:field="*{suburb}" data-cy="suburb" autofocus>
+                            <p th:if="${#fields.hasErrors('suburb')}" th:errorclass="therror" th:errors="*{suburb}"></p>
+                        </div>
+
+                        <br>
+
+                        <div class="city">
+                            <label for="city">City:</label>
+                            <input type="text" class="form-control" id="city" onchange=hasChanged()
+                                   th:field="*{city}" data-cy="city" autofocus>
+                            <p th:if="${#fields.hasErrors('city')}" th:errorclass="therror" th:errors="*{city}"></p>
+                        </div>
+
+                        <div class="postcode">
+                            <label for="postcode">Postcode:</label>
+                            <input type="text" class="form-control" id="postcode" placeholder="Optional"
+                                   onchange=hasChanged()
+                                   th:field="*{postcode}" data-cy="postcode" autofocus>
+                            <p th:if="${#fields.hasErrors('postcode')}" th:errorclass="therror"
+                               th:errors="*{postcode}"></p>
+                        </div>
+
+                        <br>
+
+                        <div class="country">
+                            <label for="country">Country:</label>
+                            <input type="text" class="form-control" id="country" onchange=hasChanged()
+                                   th:field="*{country}" data-cy="country" autofocus>
+                            <p th:if="${#fields.hasErrors('country')}" th:errorclass="therror"
+                               th:errors="*{country}"></p>
+                        </div>
+                    </div>
+
+                    <input type="hidden" id="teamClub" th:value="${team.club != null}">
+                    <input type="hidden" id="teamSport" th:value="${team.sport.id}">
+
+                    <button type="submit" class="btn btn-primary">Apply changes</button>
+                    <a th:href="@{/teams/{teamId}(teamId=${teamId})}"><button class="btn btn-danger" type="button" >Cancel</button></a>
+                </form>
+
+                <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="confirmationModalLabel">Confirmation</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                The sport of the team has been changed. Saving the changes will remove the team from the club. <br><br> Do you want to save the changes?
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button type="button" class="btn btn-primary" onclick="actualSubmit();">Apply changes</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+        <div class="col-sm-3"></div>
+    </div>
+</div>
+
+<script>
+    changed = false
+
+    function hasChanged() {
+        changed = true
+    }
+</script>
+
+<script>
+    let sportChangedFlag = false;
+
+    function sportChanged() {
+
+        const teamSport = document.getElementById('teamSport').value;
+        const selectedSport = document.getElementById('sportSelect').value;
+
+        if (teamSport !== selectedSport) {
+            sportChangedFlag = true;
+        } else {
+            sportChangedFlag = false;
+        }
+
+        console.log(sportChangedFlag)
+
+    }
+
+    function submitForm() {
+
+        if (sportChangedFlag && document.getElementById('teamClub').value === 'true') {
+            const modalElement = document.getElementById('confirmationModal');
+            const confirmationModal = new bootstrap.Modal(modalElement);
+
+            confirmationModal.show();
+            return false;
+        }
+        return true;
+    }
+
+    function actualSubmit() {
+        const submitForm = document.getElementById('submitForm');
+        if (submitForm) {
+            submitForm.submit();
+        }
+    }
+
+</script>
+
+</body>
+</html>

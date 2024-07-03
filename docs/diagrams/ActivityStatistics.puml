@@ -1,0 +1,53 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+interface ActivityStatistic<T> {
+    + getValue(): T
+}
+
+interface Comparable<T> {
+    + compareTo() : int
+}
+
+abstract class ActivityEventStatistic<T> {
+    + getValue(): T
+    + getTimeInActivity(): long
+    + getPlayer(): UserEntity
+    + getTeam(): Team
+    + compareTo() : int
+}
+
+class ScoreEventStatistic {
+    + getValue() : Integer
+    + getScorer() : UserEntity
+    + getTeamScoredFor() : Team
+}
+
+class ActivityScore {
+    - homeScore: Integer
+    - awayScore: Integer
+    - <<transient>>currentScore: Pair<Int, Int>
+    + getValue(): Pair<Integer, Integer>
+}
+
+ActivityScore .up.|> ActivityStatistic : T = Pair<Integer, Integer>
+ActivityEventStatistic .up.|> Comparable : T = ActivityEventStatistic<T>
+ActivityEventStatistic .right.|> ActivityStatistic
+ScoreEventStatistic -up-|> ActivityEventStatistic : T = Integer
+
+abstract class EventBuilder <T extends ActivityEventStatistic<?>> {
+    + withTime(long)
+    + build() : T
+}
+
+class ScoreEventBuilder {
+    + withPointValue(int)
+    + withScorer(in UserEntity)
+    + withTeam(in Team)
+    + build() : ScoreEventStatistic
+}
+
+ScoreEventBuilder -up-|> EventBuilder : T = ScoreEventStatistic
+ActivityEventStatistic <-left- EventBuilder: < Builds
+
+@enduml

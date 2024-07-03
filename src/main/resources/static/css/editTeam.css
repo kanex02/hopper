@@ -1,0 +1,12 @@
+#main-content {
+    margin-top: 1rem;
+}
+
+#button_div {
+    margin-top: 1.5rem;
+}
+
+#success-message {
+    text-align: center;
+    animation: fadeOut 3s ease-in-out forwards;
+}

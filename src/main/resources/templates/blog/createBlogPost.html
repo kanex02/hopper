@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html class="h-100" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://thymeleaf.org">
+<head>
+    <script th:src="@{/webjars/bootstrap/5.1.3/js/bootstrap.min.js}"></script>
+    <meta context="text/html; charset=UTF-8" http-equiv="Content-Type">
+    <link rel="stylesheet" th:href="@{/css/styles.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.1.3/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/custom.css}">
+    <link rel="stylesheet" th:href="@{/css/createBlogPost.css}">
+    <title>Create Post | Hopper.</title>
+</head>
+<body class="bg-dark d-flex flex-column" onload="openModal()">
+
+<div aria-hidden="true" aria-labelledby="createPostModalLabel" class="modal fade" data-bs-backdrop="static"
+     id="createPostModal" role="dialog" tabindex="-1">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createPostModalLabel">Create a post</h5>
+            </div>
+            <div class="modal-body">
+
+                <form autocomplete="off" enctype="multipart/form-data" id="createPostForm" method="post"
+                      th:action="@{/blog/create}" th:object="${blogPost}">
+
+                    <div class="row">
+                        <div class="col-6">
+                            <label for="title">Title:</label>
+                            <input autofocus id="title" name="title" placeholder="Required" th:class="${#fields.hasErrors('title')} ? 'form-control bg-transparent text-dark is-invalid' :
+                'form-control bg-transparent border-dark text-dark'"
+                                   th:field="*{title}"
+                                   type="text"/>
+                            <p class="text-danger" th:errors="*{title}"
+                               th:if="${#fields.hasErrors('title')}"></p>
+                        </div>
+
+                        <div class="col-6">
+                            <label class="" for="challenge-dropdown">Link Challenge:</label>
+
+                            <select class="form-select border-dark text-dark" id="challenge-dropdown" name="challenge"
+                                    placeholder="Link a Challenge">
+                                <option th:selected="${selectedChallenge == null}" value="">None</option>
+                                <option th:each="challengeOption : ${challenges}"
+                                        th:selected="${challenge != null and challengeOption.id == challenge.id}"
+                                        th:text="${challengeOption.goal}"
+                                        th:value="${challengeOption.id}"></option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col">
+                            <label class="mt-3" for="description">Description:</label>
+                            <textarea id="description" name="description" placeholder="Required" th:class="${#fields.hasErrors('description')} ? 'form-control bg-transparent text-dark is-invalid' :
+                                        'form-control bg-transparent border-dark text-dark'"
+                                      th:field="*{description}"
+                                      type="text" rows="5"/>
+                            <p class="text-danger" th:errors="*{description}"
+                               th:if="${#fields.hasErrors('description')}"></p>
+                        </div>
+                    </div>
+
+
+                    <div class="row">
+                        <div class="col-6">
+                            <label class="mt-3" for="proxyId">Post As:</label>
+
+                            <select class="form-select border-dark text-dark" id="proxyId" name="proxyId">
+                                <option selected>Myself</option>
+
+                                <option data-type="CLUB" th:each="club : ${clubOptions}"
+                                        th:if="${!clubOptions.isEmpty()}" th:text="${club.name}" th:value="${club.id}">
+                                </option>
+
+                                <option data-type="TEAM" th:each="team : ${teamOptions}"
+                                        th:if="${!teamOptions.isEmpty()}" th:text="${team.teamName}" th:value="${team.id}">
+                                </option>
+
+
+                            </select>
+                        </div>
+
+
+                        <div class="col-6">
+                            <label class="mt-3" for="blogVisibility">Visibility:</label>
+
+                            <select class="form-select border-dark text-dark" id="blogVisibility" name="blogVisibility">
+                            </select>
+
+                        </div>
+                    </div>
+
+
+                    <div class="row">
+                        <div class="col-12">
+                            <label class="mt-3" for="targetId">Post to Group:</label>
+
+                            <select class="form-select border-dark text-dark" id="targetId" name="targetId"></select>
+
+                            <p class="text-danger mt-1" th:id="teamClubError" th:if="${teamClubError}"
+                               th:text="${teamClubError}"></p>
+
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-12">
+                            <label class="mt-3" for="mediaUpload">Upload Media:</label>
+                        </div>
+
+                        <div class="col-7">
+
+                            <label class="btn btn-outline-dark" for="mediaUpload">Choose File</label>
+                            <span class="px-2" id="file-chosen">No file chosen</span>
+                            <input accept="image/png, image/jpeg, image/jpg, image/svg+xml, video/mp4" hidden id="mediaUpload"
+                                   name="mediaUpload"
+                                   onchange="selectMedia(this)" type="file"/><br>
+
+                            <label class="btn btn-outline-danger mt-2" hidden id="removeMediaButton"
+                                   onclick="removeMedia()">Remove Media</label>
+
+                            <p class="text-danger mt-1" th:id="imageError" th:if="${imageError}"
+                               th:text="${imageError}"></p>
+                            <p class="text-danger" id="fileTypeError"></p>
+
+                        </div>
+
+                        <div class="col-4">
+                            <video class="rounded-circle" height="100" id="vidPreview" src="#" style="display: none"
+                                   width="100"></video>
+                            <br>
+                            <img class="rounded-circle" height="100" id="imgPreview" src="#" style="display: none"
+                                 width="100"><br>
+                        </div>
+                    </div>
+
+                    <input id="proxyType" name="proxyType" type="hidden"/>
+                    <input for="clubProxy" id="clubProxy" name="clubProxy" th:field="*{clubProxy}" type="hidden"/>
+                    <input for="teamProxy" id="teamProxy" name="teamProxy" th:field="*{teamProxy}" type="hidden"/>
+                    <input for="clubTarget" id="clubTarget" name="clubTarget" th:field="*{clubTarget}" type="hidden"/>
+                    <input for="teamTarget" id="teamTarget" name="teamTarget" th:field="*{teamTarget}" type="hidden"/>
+
+                </form>
+                <div hidden>
+                    <div id="teamOptions">
+                        <option th:each="team : ${teamOptions}" th:value="${team.id}" th:text="${team.teamName}"></option>
+                    </div>
+                    <div id="clubOptions">
+                        <option th:each="club : ${clubOptions}" th:value="${club.id}" th:text="${club.name}"></option>
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-outline-danger"
+                        data-bs-dismiss="modal" th:onclick="|window.location.href='@{/feed}'|">Cancel</button>
+                <button type="submit" class="btn btn-primary" form="createPostForm">Create Post</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
+
+<script th:inline="javascript">
+    const visibilities = /*[[${visibilities}]]*/ [];
+    const numClubs = /*[[${clubOptions == null} ? 0 : ${#lists.size(clubOptions)}]]*/ 0;
+    const numTeams = /*[[${teamOptions == null} ? 0 : ${#lists.size(teamOptions)}]]*/ 0;
+    const challenge = /*[[${challenge}]]*/ null;
+    const proxy = /*[[${proxy}]]*/ null;
+    const target = /*[[${target}]]*/ null;
+    const visibility = /*[[${visibility}]]*/ null;
+
+    const challengeDropdown = document.getElementById('challenge-dropdown');
+    const proxyGroupDropdown = document.getElementById('proxyId');
+    const targetDropdown = document.getElementById('targetId');
+
+    if (challenge !== null) {
+        challengeDropdown.value = challenge.id;
+    }
+    if (proxy !== null) {
+        proxyGroupDropdown.value = proxy.id;
+    }
+    if (target !== null) {
+        targetDropdown.value = target.id;
+    }
+
+</script>
+
+<script>
+    function openModal() {
+        var postModal = new bootstrap.Modal(document.getElementById("createPostModal"));
+
+        postModal.toggle();
+    }
+
+    function selectMedia(input) {
+        let allowedExtensions = /(image\/jpg|image\/jpeg|image\/png|image\/svg|video\/mp4)$/i;
+        const fileSize = input.files[0].size / 1000 / 1000; // in MB
+        // Clear any existing error
+        const imageErrorElement = document.getElementById('imageError');
+        const fileTypeErrorElement = document.getElementById('fileTypeError');
+        const extension = input.files[0].type;
+
+        if (!allowedExtensions.test(extension)) {
+            input.value = null;
+            document.getElementById('imgPreview').style.display = "none";
+            document.getElementById('imgPreview').src = null;
+            document.getElementById('vidPreview').style.display = "none";
+            document.getElementById('vidPreview').src = null;
+            document.getElementById('file-chosen').textContent = "No file chosen";
+            fileTypeErrorElement.textContent = 'Invalid file type. Please upload an image or video.';
+            return;
+        }
+
+        fileTypeErrorElement.textContent = '';
+
+        if (imageErrorElement) {
+            imageErrorElement.textContent = '';
+        }
+        if (fileSize > 10) {
+            input.value = null;
+            document.getElementById('imgPreview').style.display = "none";
+            document.getElementById('imgPreview').src = null;
+            document.getElementById('vidPreview').style.display = "none";
+            document.getElementById('vidPreview').src = null;
+            document.getElementById('file-chosen').textContent = "No file chosen";
+        } else {
+            if (!input.files[0].name.endsWith('.mp4')) {
+                document.getElementById('imgPreview').style.display = "none";
+                document.getElementById('imgPreview').src = null;
+                document.getElementById('imgPreview').style.display = "block";
+                document.getElementById('imgPreview').src = window.URL.createObjectURL(input.files[0]);
+            } else {
+                document.getElementById('vidPreview').style.display = "none";
+                document.getElementById('vidPreview').src = null;
+                document.getElementById('vidPreview').style.display = "block";
+                document.getElementById('vidPreview').src = window.URL.createObjectURL(input.files[0]);
+            }
+            document.getElementById('file-chosen').textContent = input.files[0].name;
+            document.getElementById('removeMediaButton').hidden = false;
+        }
+    }
+
+    function removeMedia() {
+        document.getElementById('mediaUpload').value = null;
+        document.getElementById('imgPreview').style.display = "none";
+        document.getElementById('imgPreview').src = null;
+        document.getElementById('vidPreview').style.display = "none";
+        document.getElementById('vidPreview').src = null;
+        document.getElementById('removeMediaButton').hidden = true;
+        document.getElementById('file-chosen').textContent = "No file chosen";
+        document.getElementById('fileTypeError').textContent = '';
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const proxyGroupDropdown = document.getElementById('proxyId');
+        const blogVisibilityDropdown = document.getElementById('blogVisibility');
+        const targetDropdown = document.getElementById('targetId');
+        const postAsDropdown = document.getElementById('proxyId');
+
+
+        function updateVisibilityOptions() {
+            let options = '';
+            const selectedGroupType = proxyGroupDropdown.options[proxyGroupDropdown.selectedIndex].getAttribute('data-type');
+            if (selectedGroupType === 'CLUB') {
+                options = visibilities.filter(visibility => visibility !== "TEAM")
+                    .map(visibility => `<option value="${visibility}">${visibility}</option>`)
+                    .join('');
+            } else if (selectedGroupType === 'TEAM' && numClubs === 0) {
+                options = visibilities.filter(visibility => visibility !== "CLUB")
+                    .map(visibility => `<option value="${visibility}">${visibility}</option>`)
+                    .join('');
+            } else {
+                if (numTeams === 0 && numClubs === 0) {
+                    options = visibilities.filter(visibility => visibility !== "TEAM" && visibility !== "CLUB")
+                        .map(visibility => `<option value="${visibility}">${visibility}</option>`)
+                        .join('');
+                } else if (numTeams === 0) {
+                    options = visibilities.filter(visibility => visibility !== "TEAM")
+                        .map(visibility => `<option value="${visibility}">${visibility}</option>`)
+                        .join('');
+                } else if (numClubs === 0) {
+                    options = visibilities.filter(visibility => visibility !== "CLUB")
+                        .map(visibility => `<option value="${visibility}">${visibility}</option>`)
+                        .join('');
+                } else {
+                    options = visibilities.map(visibility => `<option value="${visibility}">${visibility}</option>`).join('');
+                }
+            }
+            blogVisibilityDropdown.innerHTML = options;
+            if (visibility !== null) {
+                blogVisibilityDropdown.value = visibility;
+            }
+        }
+
+        function updateTargetOptions() {
+            let options = '';
+            const selectedVisibility = blogVisibilityDropdown.value;
+
+            if (selectedVisibility === 'TEAM') {
+                options = document.getElementById('teamOptions').innerHTML
+                targetDropdown.disabled = false;
+            } else if (selectedVisibility === 'CLUB') {
+                options = document.getElementById('clubOptions').innerHTML
+                targetDropdown.disabled = false;
+            } else {
+                options = `<option selected style="color: gray;">None</option>`;
+                targetDropdown.disabled = true;
+            }
+
+            targetDropdown.innerHTML = options;
+            updateTarget();
+        }
+
+        function updateProxyType() {
+            const selectedGroupType = postAsDropdown.options[postAsDropdown.selectedIndex].getAttribute('data-type');
+            const selectedGroupValue = postAsDropdown.value;
+            const clubProxy = document.getElementById('clubProxy');
+            const teamProxy = document.getElementById('teamProxy');
+            document.getElementById('proxyType').value = selectedGroupType;
+            if (selectedGroupType === 'CLUB') {
+                clubProxy.value = selectedGroupValue;
+                teamProxy.value = null;
+            } else if (selectedGroupType === 'TEAM') {
+                teamProxy.value = selectedGroupValue;
+                clubProxy.value = null;
+            } else {
+                clubProxy.value = null;
+                teamProxy.value = null;
+            }
+            updateTargetOptions();
+        }
+
+        function updateTarget() {
+            const selectedVisibility = blogVisibilityDropdown.value;
+            const targetDropdown = document.getElementById('targetId');
+            const clubTarget = document.getElementById('clubTarget');
+            const teamTarget = document.getElementById('teamTarget');
+
+            if (selectedVisibility === 'CLUB') {
+                clubTarget.value = targetDropdown.value;
+                teamTarget.value = null;
+            } else if (selectedVisibility === 'TEAM') {
+                teamTarget.value = targetDropdown.value;
+                clubTarget.value = null;
+            } else {
+                clubTarget.value = null;
+                teamTarget.value = null;
+            }
+        }
+
+        function updateChallenge() {
+            const selectedProxyType = postAsDropdown.options[postAsDropdown.selectedIndex].getAttribute('data-type');
+            const challengeDropdown = document.getElementById('challenge-dropdown');
+
+            if (selectedProxyType === 'CLUB' || selectedProxyType === 'TEAM') {
+                challengeDropdown.value = challengeDropdown.options[0].value;
+                challengeDropdown.disabled = true;
+            } else {
+                challengeDropdown.disabled = false;
+                challengeDropdown.value = challengeDropdown.options[0].value;
+            }
+        }
+
+        updateVisibilityOptions();
+        updateTargetOptions();
+        updateProxyType();
+        updateTarget();
+        const selectedProxyType = postAsDropdown.options[postAsDropdown.selectedIndex].getAttribute('data-type');
+        if (selectedProxyType === 'CLUB' || selectedProxyType === 'TEAM') {
+            updateChallenge();
+        }
+
+        proxyGroupDropdown.addEventListener('change', updateVisibilityOptions);
+        blogVisibilityDropdown.addEventListener('change', updateTargetOptions);
+        postAsDropdown.addEventListener('change', updateProxyType);
+        targetDropdown.addEventListener('change', updateTarget);
+        postAsDropdown.addEventListener('change', updateChallenge);
+    });
+
+
+</script>

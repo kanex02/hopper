@@ -1,0 +1,82 @@
+<div th:fragment="hopsProgression" id="progressionWrapper" class="p-3">
+    <link rel="stylesheet" th:href="@{/css/hopsProgression.css}">
+    <div id="progression" class="d-flex align-items-center user-select-none">
+        <div id="scrollProgressionLeft" style="cursor: pointer; margin-top: 60px">
+            <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="bi bi-chevron-left" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
+            </svg>
+        </div>
+        <div class="overflow-hidden">
+
+            <div class="d-flex flex-row-reverse gap-3">
+                <p th:if="${hopsRequired} != 0" th:text="|Hops: ${user.totalHops} / ${user.totalHops + hopsRequired} for Next Level|"></p>
+                <p th:if="${hopsRequired} == 0" th:text="|Hops: ${user.totalHops} You are max level!|"></p>
+            </div>
+            <div class="progress">
+                <div class="progress-bar" role="progressbar" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100" th:style="|width: ${(user.level-1.0)/(#lists.size(levels)-1.0)*100}%|"></div>
+            </div>
+            <div id="levels" class="d-flex flex-nowrap overflow-hidden pt-3 gap-1">
+                <div th:each="level:${levels}"
+                     class="level flex-shrink-0 d-flex flex-column align-items-center pt-3 p-1"
+                     th:classappend="${level.id > user.level} ? 'locked' : ''">
+                    <h5 th:text="${level.id}"></h5>
+                    <div class="w-100 position-relative">
+                        <img th:src="@{${level.reward?.path}}" class="w-100 level-reward">
+                        <div th:if="${level.reward != null}" class="gradient-accent"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="scrollProgressionRight" style="cursor: pointer; margin-top: 60px">
+            <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+            </svg>
+        </div>
+    </div>
+    <script th:inline="javascript">
+
+        document.getElementById("scrollProgressionLeft").addEventListener("click", function(event) {
+            scrollLevels("left");
+            event.preventDefault();
+        });
+
+        document.getElementById("scrollProgressionRight").addEventListener("click", function(event) {
+            scrollLevels("right");
+            event.preventDefault();
+        });
+
+        let userLevel = [[${user.level}]];
+
+        // Set the level scroll to show the current level by default
+        let levelsDiv = document.getElementById("levels");
+        let levelScroll = (100 * (userLevel)) - levelsDiv.clientWidth / 2;
+
+        if (levelScroll < 0) {
+            levelScroll = 0;
+        } else if (levelScroll > levelsDiv.scrollWidth - levelsDiv.clientWidth) {
+            levelScroll = levelsDiv.scrollWidth - levelsDiv.clientWidth;
+        }
+
+        // not smooth scroll, so it doesn't look weird when the page loads
+        levelsDiv.scroll({
+            left: levelScroll
+        });
+
+        function scrollLevels(direction) {
+            if (direction === "left") {
+                levelScroll -= window.innerWidth / 3;
+            } else if (direction === "right") {
+                levelScroll += window.innerWidth / 3;
+            }
+            if (levelScroll < 0) {
+                levelScroll = 0;
+            } else if (levelScroll > levelsDiv.scrollWidth - levelsDiv.clientWidth) {
+                levelScroll = levelsDiv.scrollWidth - levelsDiv.clientWidth;
+            }
+            levelsDiv.scroll({
+                left: levelScroll,
+                behavior: 'smooth'
+            });
+        }
+    </script>
+</div>

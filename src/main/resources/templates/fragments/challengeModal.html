@@ -1,0 +1,253 @@
+<div th:fragment="challengeModal">
+  <div id="challenge-modal" class="modal text-black" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Modal title</h5>
+          <button type="button" class="close btn btn-outline-primary" data-dismiss="modal" aria-label="Close"
+                  onclick="closeChallengeModal()">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body" id="challenge-modal-body">
+          <p>Modal body text goes here.</p>
+        </div>
+        <div class="modal-footer justify-content-center">
+          <button id="completeChallengeButton" class="btn btn-primary" onclick="openCompleteChallenge()">Complete challenge!</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade text-black" id="createPostModal" tabindex="-1" role="dialog"
+       aria-labelledby="createPostModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="createPostModalLabel">Complete challenge</h5>
+          <button type="button" class="close btn btn-outline-primary" data-dismiss="modal" aria-label="Close"
+                  onclick="closeCompleteChallengeModal()">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+
+          <form th:action="@{/challenge/complete}" id="challengePostForm" autocomplete="off" method="post"
+                th:object="${blogPost}" enctype="multipart/form-data">
+            <input name="challengeId" value="${id}" id="challenge-id" hidden>
+
+            <div class="alert alert-info mb-0">
+              <p id="previewText" class="mb-0"></p>
+            </div>
+
+            <br>
+            <input name="title" value="Challenge Completed" hidden/>
+            <div class="form-group">
+              <label >Title:</label>
+              <p id="title"></p>
+            </div>
+
+            <div class="form-group">
+              <label for="description">Description:*</label>
+              <textarea type="text" id="description" name="description" th:field="*{description}" placeholder="Required"
+                        th:class="${editErrors != null && #maps.containsKey(editErrors, 'description')} ?
+                     'form-control bg-transparent text-dark is-invalid' :
+                     'form-control bg-transparent border-dark text-dark'" rows="5"></textarea>
+              <p th:if="${editErrors != null && #maps.containsKey(editErrors, 'description')} " class="invalid-feedback"
+                 th:text="${editErrors['description']}"></p>
+            </div>
+
+            <div class="row">
+
+              <div class="col-12">
+                <label class="mt-3" for="mediaUpload">Upload Media:</label>
+              </div>
+
+              <div class="col-8">
+
+                <label for="mediaUpload" class="btn btn-outline-dark">Choose File</label>
+                <span class="px-2" id="file-chosen">No file chosen</span>
+                <input id="mediaUpload" type="file" name="mediaUpload"
+                       accept="image/png, image/jpeg, image/jpg, image/svg+xml, video/mp4"
+                       onchange="selectMedia(this)" hidden/><br>
+
+                <label id="removeMediaButton" class="btn btn-outline-danger mt-2" onclick="removeMedia()"
+                       hidden>Remove Media</label>
+
+                <p id="media-violation-msg" class="text-danger" th:if="${mediaViolation}"
+                   th:text="${mediaViolation}">Invalid image</p>
+
+              </div>
+
+              <div class="col-4">
+                <video class="rounded-circle" id="vidPreview" src="#" width="100" height="100" style="display: none"></video><br>
+                <img class="rounded-circle" id="imgPreview" src="#" width="100" height="100"  style="display: none"><br>
+              </div>
+            </div>
+
+          </form>
+
+        </div>
+        <div class="modal-footer justify-content-center">
+          <button type="button" class="btn btn-outline-danger"
+                  data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary" form="challengePostForm">Create Post</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <script th:inline="javascript">
+    let challengeModal = new bootstrap.Modal(document.getElementById('challenge-modal'), {})
+    let completeChallengeModal = new bootstrap.Modal(document.getElementById('createPostModal'), {})
+    let challengeIdValue = document.getElementById('challenge-id');
+    let completeChallengeButton = document.getElementById('completeChallengeButton');
+    let availableChallenges = [[${availableChallenges}]];
+    let completedChallenges = [[${completedChallenges}]];
+
+    let modalTitle = document.querySelector(".modal-title");
+    let modalBody = document.querySelector("#challenge-modal-body");
+    let previewText = document.getElementById('previewText');
+
+    const userId = [[${user.id}]];
+    const baseUrl = /*[[${basePath}]]*/ '';
+
+    let title = document.getElementById("title");
+
+
+    function openChallengeModal(id, challenges, author, isComplete = false) {
+
+      //NB: challenges is a list of challenges but only the first challenge has userGeneratedFor as a UserEntity,
+      // the rest of the challenges have userGeneratedFor as an id???
+      // const challengeList = /*[[${availableChallenges}]]*/ []; doesn't work either
+
+      let challenge = challenges.find(challenge => challenge.id === id)
+      modalTitle.innerHTML = challenge.title;
+      modalBody.innerHTML = `<p>${challenge.goal}</p><p>+${challenge.hops} Hops</p>`;
+
+      if (challenge.userGeneratedFor.id === userId) {
+        modalBody.innerHTML += `
+                <div style="position: relative; height: 16px; margin-left: 0" class="d-flex flex-nowrap align-items-center mt-2">
+                    <div id="share-icon" style="opacity: 0.8; background-color: #256ed9; cursor: pointer" onclick="closeChallengeModal();showShareChallengeModal(${challenge.id}); event.stopImmediatePropagation()"
+                    class="d-flex flex-nowrap align-items-center py-1 px-2 rounded-pill text-light">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor"
+                           class="bi bi-send-fill" viewBox="0 0 16 16">
+                          <path d="M15.964.686a.5.5 0 0 0-.65-.65L.767 5.855H.766l-.452.18a.5.5 0 0 0-.082.887l.41.26.001.002 4.995 3.178 3.178 4.995.002.002.26.41a.5.5 0 0 0 .886-.083l6-15Zm-1.833 1.89L6.637 10.07l-.215-.338a.5.5 0 0 0-.154-.154l-.338-.215 7.494-7.494 1.178-.471-.47 1.178Z"/>
+                      </svg>
+                      <div id="share-text" style="width: 5ch; overflow: hidden">
+                          <p class="mb-0 text-nowrap small" style="margin-left: 0.25rem">Share</p>
+                      </div>
+                    </div>
+                </div>`
+      } else {
+        modalBody.innerHTML += `
+      <div style="position: relative; height: 16px; margin-left: 0" class="d-flex flex-nowrap align-items-center mt-2">
+        <div>
+              <div id="share-text" class="d-flex align-items-center">
+                  <span class="small">Invited by </span>
+                  <a href="${baseUrl}user/${challenge.userGeneratedFor.id}" onclick="event.stopImmediatePropagation()" class="text-body">
+                    <p class="mb-0 text-nowrap small" style="max-width: 20ch; overflow: hidden;margin-left: 0.25rem; text-overflow:ellipsis;">
+                        ${author}
+                    </p>
+                  </a>
+              </div>
+          </div>
+        </div>
+        `
+      }
+
+
+      title.innerText = "Challenge Complete: " + challenge.title;
+      challengeIdValue.value = id;
+      previewText.innerHTML = 'Post about this challenge to complete it and earn ' + challenge.hops + ' hops!';
+
+      if (isComplete) {
+        completeChallengeButton.classList.remove('btn-primary');
+        completeChallengeButton.classList.add('btn-dark');
+        completeChallengeButton.disabled = true;
+      } else {
+        completeChallengeButton.classList.remove('btn-dark');
+        completeChallengeButton.classList.add('btn-primary');
+        completeChallengeButton.disabled = false;
+      }
+
+      challengeModal.show();
+    }
+
+    function closeChallengeModal() {
+      challengeModal.hide();
+    }
+
+    function closeCompleteChallengeModal() {
+      completeChallengeModal.hide();
+    }
+
+    function openCompleteChallenge() {
+      challengeModal.hide();
+      completeChallengeModal.show();
+    }
+
+    function clearErrorOnModalClose() {
+
+      // For description
+      let descriptionInput = document.getElementById('description');
+      let descriptionErrorMessage = descriptionInput.nextElementSibling;
+
+      descriptionInput.classList.remove('is-invalid');
+      descriptionInput.classList.add('form-control', 'bg-transparent', 'border-dark', 'text-dark');
+      descriptionInput.value = '';  // Clearing the description textarea value
+      if (descriptionErrorMessage) {
+        descriptionErrorMessage.textContent = '';
+      }
+
+      // For media violation
+      let mediaViolationMsg = document.getElementById('media-violation-msg');
+      if (mediaViolationMsg) {
+        mediaViolationMsg.textContent = '';
+      }
+      removeMedia();
+    }
+
+    let completeChallengeModalElement = document.getElementById('createPostModal');
+    completeChallengeModalElement.addEventListener('hidden.bs.modal', clearErrorOnModalClose);
+
+    function previewMedia(file) {
+      if (!file.name.endsWith('.mp4')) {
+        document.getElementById('vidPreview').style.display = "none";
+        document.getElementById('vidPreview').src = null;
+        document.getElementById('imgPreview').style.display = 'block';
+        document.getElementById('imgPreview').src = window.URL.createObjectURL(file);
+      } else {
+        document.getElementById('imgPreview').style.display = "none";
+        document.getElementById('imgPreview').src = null;
+        document.getElementById('vidPreview').style.display = 'block';
+        document.getElementById('vidPreview').src = window.URL.createObjectURL(file);
+      }
+      document.getElementById('file-chosen').textContent = file.name;
+      document.getElementById('file-chosen').hidden = false;
+      document.getElementById('removeMediaButton').hidden = false;
+      if (document.getElementById('media-violation-msg') !== null) {
+        document.getElementById('media-violation-msg').hidden = true;
+      }
+    }
+
+    function selectMedia(input) {
+      previewMedia(input.files[0])
+    }
+
+    function removeMedia() {
+      document.getElementById('mediaUpload').value = null;
+      document.getElementById('imgPreview').style.display = 'none';
+      document.getElementById('imgPreview').src = null;
+      document.getElementById('vidPreview').style.display = 'none';
+      document.getElementById('vidPreview').src = null;
+      document.getElementById('removeMediaButton').hidden = true;
+      document.getElementById('file-chosen').textContent = 'No file chosen';
+      if (document.getElementById('media-violation-msg') !== null) {
+        document.getElementById('media-violation-msg').hidden = true;
+      }
+    }
+
+  </script>
+</div>

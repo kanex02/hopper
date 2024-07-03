@@ -1,0 +1,67 @@
+.level {
+    width: 100px;
+    background: rgb(19,186,170);
+    background: linear-gradient(0deg, rgb(229, 170, 86) 0%, rgb(222, 204, 73) 70%);
+    border-radius: 5px;
+    color: black;
+}
+
+.level-reward {
+    border-radius: 50px;
+    position: relative;
+    z-index: 1;
+}
+
+#progressionWrapper {
+    background: rgb(67,183,227);
+    background: linear-gradient(153deg, rgb(115, 159, 238) 0%, rgb(85, 189, 229) 50%, rgb(115, 159, 238) 100%);
+    position: relative;
+    border-radius: 12px;
+}
+
+#progression {
+    position: relative;
+    color: #eaeaea;
+}
+
+#progression > * {
+    z-index: 1;
+}
+
+.rabbit-background {
+    opacity: 0.1;
+    background-repeat: repeat;
+    background-size: 70px;
+    z-index: -1;
+}
+
+.gradient-accent {
+    width: 130%;
+    height: 130%;
+    position: absolute;
+    background: rgb(67,183,227);
+    background: radial-gradient(circle, rgb(232, 219, 116) 20%, rgba(60,125,222,0) 80%);
+    top: -25%;
+    left: -25%;
+}
+
+.locked {
+    pointer-events: none;
+    position: relative;
+}
+
+.locked:before {
+    content: ' ';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.4);
+    top: 0;
+    left: 0;
+    z-index: 2;
+    border-radius: 5px;
+}
+
+.progress .progress-bar {
+    background: linear-gradient(-70deg, rgb(229, 170, 86) 0%, rgb(222, 204, 73) 70%);
+}

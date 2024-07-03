@@ -1,0 +1,90 @@
+.profile-pic-container {
+    width: 50%;
+    max-width: 250px;
+    min-width: 150px;
+    aspect-ratio: 1;
+}
+
+.profile-pic {
+    width: 100%;
+    position: relative;
+    aspect-ratio: 1;
+}
+
+#savedImage, #imagePreview {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 3px solid purple;
+    object-fit: cover;
+}
+
+#imagePreview {
+    z-index: 2;
+
+}
+
+#savedImage {
+    z-index: 1;
+}
+
+.profile-pic-picker {
+    position: absolute;
+    right: 5%;
+    top: 5%;
+    z-index: 10;
+}
+
+.profile-pic-picker input {
+    display: none;
+}
+
+.profile-pic-picker label {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    /*margin-bottom: 0;*/
+    border-radius: 100%;
+    background: #FFFFFF;
+    border: 1px solid transparent;
+    box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.12);
+    cursor: pointer;
+    font-weight: normal;
+    transition: all .2s ease-in-out;
+}
+
+.profile-pic-picker label:after {
+    content: var(--image);
+    font-family: FontAwesome, serif;
+    color: #757575;
+    font-size: 20px;
+}
+
+.button-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 4;
+}
+
+.upload-btn {
+    margin: 5px;
+    border: 2px solid transparent;
+    transition: border-color 0.2s ease;
+    opacity: 0.85;
+}
+
+.upload-btn:hover {
+    border-color: black;
+    border-style: solid;
+}

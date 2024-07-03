@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://thymeleaf.org" class="h-100">
+<head>
+    <script th:src="@{/webjars/bootstrap/5.1.3/js/bootstrap.min.js}"></script>
+    <meta http-equiv="Content-Type" context="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Team | TAB</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.1.3/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/custom.css}">
+    <link th:href="@{/css/styles.css}" rel="stylesheet">
+    <link th:href="@{/css/createTeam.css}" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" th:href="@{/css/navbar.css}">
+    <script th:src="@{/js/location_suggest.js}"></script>
+</head>
+<body class="bg-dark d-flex flex-column h-100">
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <div id="main-content" class="flex-grow-1 pt-3 pb-3">
+
+        <div id="teamRegisterCard" class="card bg-light text-dark p-5 rounded-form shadow">
+            <h2 class="card-title">Register a team</h2>
+
+            <hr>
+
+            <div class="form-group">
+                <form class="needs-validation" th:action="@{create_team}" autocomplete="off" method="post" th:object="${team}"
+                      enctype="multipart/form-data">
+
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-6">
+                                <label for="teamName">Team name:*</label>
+                                <div class="questionTooltip">
+                                    <span class="questionTooltipText" th:text="${errorMessages[0]}"></span>
+                                    <svg id="" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-question-circle ms-1 mb-1" viewBox="0 0 16 16">
+                                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                        <path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z"/>
+                                    </svg>
+                                </div>
+                                <input type="text" th:class="${#fields.hasErrors('teamName')} ? 'form-control bg-transparent text-dark is-invalid' : 'form-control bg-transparent border-dark text-dark'" id="teamName" placeholder="Required" onchange=hasChanged()
+                                       th:field="*{teamName}" data-cy="teamName" autofocus>
+                                <p th:if="${#fields.hasErrors('teamName')}"
+                                   class="text-danger">Please enter a valid team name</p>
+<!--                                th:errorclass="therror" th:errors="*{teamName}"-->
+                            </div>
+
+                            <div class="col-6">
+                                <div>
+                                    <label>Sport:*</label>
+                                    <select class="form-select border-dark" name="sport"
+                                            th:class="${sportError != null} ? 'form-select bg-transparent is-invalid' : 'form-select bg-transparent border-dark'">
+                                        <option value="" disabled th:selected="${selectedSport == null}"> Select your option</option>
+                                        <option th:each="sport : ${sports}" th:value="${sport.id}"
+                                                th:selected="${#strings.equals(selectedSport, #strings.toString(sport.id))}"
+                                                th:text="${sport.name}"></option>
+                                    </select>
+                                    <p th:if="${sportError != null}"
+                                       th:text="${sportError}" class="text-danger"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="location" th:object="${location}">
+
+                        <div class="container">
+                            <div class="address-line-1">
+                                <label for="addressLine1">Address:</label><br>
+                                <div class="autocomplete">
+                                    <input type="text" class="form-control bg-light text-dark border-dark" id="addressLine1" placeholder="Optional"
+                                           onchange=hasChanged()
+                                           th:oninput=suggestAddress([[@{/locationSuggest}]])
+                                           th:field="*{addressLine1}" data-cy="addressLine1" autofocus>
+                                </div>
+                                <p th:if="${#fields.hasErrors('addressLine1')}" class="text-danger">Invalid address field</p>
+                            </div>
+
+
+                            <div class="address-line-2 pt-2">
+                                <input type="text" class="form-control bg-light text-dark border-dark" id="addressLine2" placeholder="Optional"
+                                       onchange=hasChanged()
+                                       th:field="*{addressLine2}" data-cy="addressLine2" autofocus>
+                                <p th:if="${#fields.hasErrors('addressLine2')}" class="text-danger">Invalid address field</p>
+                            </div>
+                        </div>
+
+                        <br>
+
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="city">
+                                        <label for="city">City:*</label>
+                                        <div class="questionTooltip">
+                                            <span class="questionTooltipText" th:text="${errorMessages[2]}"></span>
+                                            <svg id="" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-question-circle ms-1 mb-1 questionTooltip" viewBox="0 0 16 16">
+                                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                                <path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z"/>
+                                            </svg>
+                                        </div>
+                                        <input type="text" class="form-control bg-light text-dark border-dark" id="city" placeholder="Required" onchange=hasChanged()
+                                               th:field="*{city}" data-cy="city" autofocus>
+                                        <p th:if="${#fields.hasErrors('city')}"
+                                           class="text-danger">Please enter a valid city</p>
+                                    </div>
+                                </div>
+
+                                <div class="col-6">
+                                    <div class="country">
+                                        <label for="country">Country:*</label>
+                                        <div class="questionTooltip">
+                                            <span class="questionTooltipText" th:text="${errorMessages[3]}"></span>
+                                            <svg id="" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-question-circle ms-1 mb-1 questionTooltip" viewBox="0 0 16 16">
+                                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                                <path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z"/>
+                                            </svg>
+                                        </div>
+                                        <input type="text" class="form-control bg-light text-dark border-dark" id="country" placeholder="Required" onchange=hasChanged()
+                                               th:field="*{country}" data-cy="country" autofocus>
+                                        <p th:if="${#fields.hasErrors('country')}" th:errorclass="therror" th:errors="*{country}"
+                                           class="text-danger">Please enter a valid country</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <br>
+
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="suburb">
+                                        <label for="suburb">Suburb:</label>
+                                        <input type="text" class="form-control bg-light text-dark border-dark" id="suburb" placeholder="Optional"
+                                               onchange=hasChanged()
+                                               th:field="*{suburb}" data-cy="suburb" autofocus>
+                                        <p th:if="${#fields.hasErrors('suburb')}"
+                                           class="text-danger">Invalid suburb</p>
+                                    </div>
+                                </div>
+
+                                <div class="col-6">
+                                    <div class="postcode">
+                                        <label for="postcode">Postcode:</label>
+                                        <input type="text" class="form-control bg-light text-dark border-dark" id="postcode" placeholder="Optional"
+                                               onchange=hasChanged()
+                                               th:field="*{postcode}" data-cy="postcode" autofocus>
+                                        <p th:if="${#fields.hasErrors('postcode')}"
+                                           class="text-danger">Invalid postcode</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <br>
+
+                    <div class="container">
+                        <label for="input-file">Profile image:</label>
+                        <img class="pt-2 rounded-circle" id="imagePreview" src="#" width="100" height="100"  style="display: none"><br>
+                        <p id="imageErrorJs" class="alert alert-danger" style="display: none"></p>
+                        <div th:if="${imageError}">
+                            <p th:text="${imageError}" class="therror"></p>
+                        </div>
+                        <label id="profilePictureLabel" for="input-file" class="btn btn-outline-dark">Choose Image</label>
+                        <span class="px-2" id="file-chosen">No file chosen</span>
+                        <input id="input-file" type="file" name="imageUpload"
+                               accept="image/png, image/jpeg, image/jpg, image/svg+xml"
+                               onchange="selectImage(this)" hidden/><br>
+
+                        <label id="removeImageButton" class="btn btn-outline-danger mt-2" onclick="removeImage()" style="display: none">Remove Image</label>
+                    </div>
+
+                    <hr>
+
+                    <div id="button_div" class="text-center ">
+                        <button type="submit" class="btn btn-primary me-2">Create Team</button>
+                        <a>
+                            <button type="button" th:onclick="|window.location.href='@{/}'|" class="btn btn-outline-danger ms-2" id="cancel">Cancel
+                            </button>
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+
+<script>
+    function selectImage(input) {
+        const fileSize = input.files[0].size / 1000 / 1000; // in MB
+        if (fileSize > 10) {
+            input.value = null;
+            document.getElementById('imageErrorJs').innerText = "File cannot exceed 10MB";
+            document.getElementById('imageErrorJs').style.display = "block";
+            document.getElementById('imagePreview').style.display = "none";
+            document.getElementById('imagePreview').src = null;
+            document.getElementById('file-chosen').textContent = "No file chosen";
+        } else {
+            document.getElementById('imageErrorJs').innerText = "";
+            document.getElementById('imageErrorJs').style.display = "none";
+            document.getElementById('imagePreview').style.display = "block";
+            document.getElementById('imagePreview').src = window.URL.createObjectURL(input.files[0]);
+            document.getElementById('file-chosen').textContent = input.files[0].name;
+            document.getElementById('removeImageButton').style.display = "block";
+        }
+    }
+
+    function removeImage() {
+        document.getElementById('input-file').value = null;
+        document.getElementById('imageErrorJs').innerText = "";
+        document.getElementById('imageErrorJs').style.display = "none";
+        document.getElementById('imagePreview').style.display = "none";
+        document.getElementById('imagePreview').src = null;
+        document.getElementById('removeImageButton').style.display = "none";
+        document.getElementById('file-chosen').textContent = "No file chosen";
+    }
+</script>

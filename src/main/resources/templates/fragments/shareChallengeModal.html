@@ -1,0 +1,245 @@
+<div th:fragment="shareChallengeModal">
+  <link th:href="@{/css/shareChallenge.css}" rel="stylesheet">
+  <div id="share-challenge-modal" class="modal text-black" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Share Challenge</h5>
+          <button type="button" class="close btn btn-outline-primary" data-dismiss="modal" aria-label="Close"
+                  onclick="closeShareChallengeModal()">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body" id="challenge-modal-body">
+          <div class="position-relative" id="friend-search-wrapper">
+            <input oninput="findFriends()" autocomplete="off" type="text" id="friend-search"
+                   class="form-control border-dark me-2" aria-label="Search" placeholder="Search to invite friends and earn extra hops together!"/>
+            <div id="suggested-friends" class="position-absolute rounded"
+                 style="display: none; max-height: 150px; overflow: auto; top: 45px; width: 100%; background: #eeeeee"></div>
+          </div>
+          <h5 id="selected-text" class="mt-3 mb-0">Selected</h5>
+          <div id="selected-friends" style="max-height: 150px; overflow: auto;"></div>
+
+          <h5 id="invited-text" class="mt-3 mb-0">Invited</h5>
+          <div id="invited-friends" style="max-height: 150px; overflow: auto;"></div>
+        </div>
+
+        <div class="modal-footer justify-content-center">
+          <div id="no-selected-error" class="col-12 text-center text-danger"></div>
+          <form id="invite-friends-form" th:action="@{/challenge/share}" method="post">
+            <input type="hidden" id="challengeId" name="challengeId"/>
+            <input type="hidden" id="selectedFriendsField" name="selectedFriends"/>
+            <input type="hidden" id="redirect" name="redirect">
+            <button id="shareChallengeButton" class="btn btn-primary" type="button">Add friends to
+              challenge!
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script th:inline="javascript">
+      const challenges = /*[[${challenges}]]*/ [];
+      const friends = [[${user.friends}]];
+      const suggestedFriendsDiv = document.getElementById("suggested-friends");
+      const friendSearch = document.getElementById("friend-search");
+      // const basePath = /*[[${basePath}]]*/ '';
+      let selectedFriends = [];
+      const selectedFriendsDiv = document.getElementById("selected-friends");
+      const selectedText = document.getElementById("selected-text");
+      const invitedFriendsDiv = document.getElementById("invited-friends");
+      let selectedChallenge = null;
+
+      const updateInvitedFriends = () => {
+        invitedFriendsDiv.innerHTML = "";
+        challenges.filter(challenge => challenge.id === selectedChallenge).at(0)?.invitedUsers.forEach((friend) => {
+          // Generate profile image for user
+          let profilePicture = document.createElement('img');
+          profilePicture.src = (friend.profilePicturePath !== null ? baseUrl + friend.profilePicturePath.slice(1) : baseUrl + 'images/defaultPicture.png')
+          profilePicture.style.width = '32px';
+          profilePicture.style.height = '32px';
+          profilePicture.style.marginRight = '5px';
+          profilePicture.style.background = 'lightgray';
+          profilePicture.style.borderRadius = '100px';
+
+          let name = document.createElement('p');
+          name.innerText = friend.firstName + ' ' + friend.lastName;
+          name.style.marginBottom = '0';
+          name.style.overflow = 'hidden';
+          name.style.textOverflow = 'ellipsis';
+          name.style.whiteSpace = 'nowrap';
+
+          let invitedFriend = document.createElement('div');
+          invitedFriend.appendChild(profilePicture);
+          invitedFriend.appendChild(name);
+          invitedFriend.style.height = '50px';
+          invitedFriend.className = 'd-flex align-items-center';
+          invitedFriendsDiv.appendChild(invitedFriend);
+
+        });
+
+        if (challenges.filter(challenge => challenge.id === selectedChallenge).at(0)?.invitedUsers.length === 0) {
+          let noInvitedFriends = document.createElement('p');
+
+          noInvitedFriends.innerText = "No friends invited.";
+          noInvitedFriends.className = "mb-0";
+
+          invitedFriendsDiv.appendChild(noInvitedFriends);
+        }
+      }
+
+      const findFriends = () => {
+          suggestedFriendsDiv.innerHTML = ""
+
+          let searchText = friendSearch.value.toLowerCase();
+          let suggestedFriends = friends.filter((user) => {
+              return user.firstName.toLowerCase().concat(' '.concat(user.lastName.toLowerCase())).includes(searchText) &&
+                  !selectedFriends.some(selectedFriend => {
+                      return selectedFriend.id === user.id;
+                  });
+          }).filter((user) => {
+
+            return !challenges.filter(challenge => challenge.id === selectedChallenge).at(0)?.invitedUsers.some(invitedUser => {
+              return invitedUser.id === user.id;
+            });
+          });
+
+          suggestedFriends.forEach((friend) => {
+              // Generate profile image for user
+              let profilePicture = document.createElement('img');
+              profilePicture.src = (friend.profilePicturePath !== null ? baseUrl + friend.profilePicturePath.slice(1) : baseUrl + 'images/defaultPicture.png')
+              profilePicture.style.width = '32px';
+              profilePicture.style.height = '32px';
+              profilePicture.style.marginRight = '5px';
+              profilePicture.style.background = 'lightgray';
+              profilePicture.style.borderRadius = '100px';
+
+              let name = document.createElement('p');
+              name.innerText = friend.firstName + ' ' + friend.lastName;
+              name.style.marginBottom = '0';
+              name.style.overflow = 'hidden';
+              name.style.textOverflow = 'ellipsis';
+              name.style.whiteSpace = 'nowrap';
+
+              let suggestedFriend = document.createElement('div');
+              suggestedFriend.appendChild(profilePicture);
+              suggestedFriend.appendChild(name);
+              suggestedFriend.style.height = '50px';
+              suggestedFriend.className = 'd-flex align-items-center';
+              suggestedFriend.onmousedown = () => addFriend(friend);
+              suggestedFriendsDiv.appendChild(suggestedFriend);
+          })
+
+        if (suggestedFriends.length === 0) {
+          let noFriends = document.createElement('p');
+
+          noFriends.innerText = "No friends found.";
+            noFriends.className = "p-2 mb-0";
+
+          suggestedFriendsDiv.appendChild(noFriends);
+        }
+      }
+
+      const addFriend = (friend) => {
+          const isFriendAlreadyselected = selectedFriends.some((selectedFriend) => selectedFriend.id === friend.id);
+          if (!isFriendAlreadyselected) {
+              selectedFriends.push(friend);
+              updateFriends();
+          }
+      };
+
+      const updateSelectedFriends = () => {
+          selectedFriendsDiv.innerHTML = "";
+          if (selectedFriends.length === 0) {
+              selectedText.style.display = 'none';
+          } else {
+              selectedText.style.display = 'block';
+          }
+
+          selectedFriends.forEach((friend) => {
+              // Generate profile image for user
+              let profilePicture = document.createElement('img');
+              profilePicture.src = (friend.profilePicturePath !== null ? baseUrl + friend.profilePicturePath.slice(1) : baseUrl + 'images/defaultPicture.png')
+              profilePicture.style.width = '32px';
+              profilePicture.style.height = '32px';
+              profilePicture.style.marginRight = '5px';
+              profilePicture.style.background = 'lightgray';
+              profilePicture.style.borderRadius = '100px';
+
+              let name = document.createElement('p');
+              name.innerText = friend.firstName + ' ' + friend.lastName;
+              name.style.marginBottom = '0';
+              name.style.textOverflow = 'ellipsis';
+              name.style.whiteSpace = 'nowrap';
+              name.style.overflow = 'hidden';
+
+              let removeButton = document.createElement('button');
+              removeButton.className = 'btn btn-outline-danger btn-sm';
+              removeButton.innerText = 'Remove';
+              removeButton.style.marginLeft = 'auto';
+              removeButton.onclick = () => removeFriend(friend);
+
+              let selectedFriend = document.createElement('div');
+              selectedFriend.appendChild(profilePicture);
+              selectedFriend.appendChild(name);
+              selectedFriend.appendChild(removeButton);
+              selectedFriend.style.width = '100%';
+              selectedFriend.style.height = '50px';
+              selectedFriend.className = 'd-flex align-items-center';
+              selectedFriendsDiv.appendChild(selectedFriend);
+          })
+      }
+
+      const removeFriend = (friend) => {
+          selectedFriends = selectedFriends.filter((selectedFriend) => selectedFriend.id !== friend.id);
+          updateFriends();
+      }
+
+      const updateFriends = () => {
+        findFriends();
+        updateSelectedFriends();
+      }
+
+      updateFriends();
+
+      const shareChallengeForm = document.getElementById('invite-friends-form');
+      const selectedFriendsField = document.getElementById('selectedFriendsField');
+      const challengeIdField = document.getElementById('challengeId');
+      const redirectField = document.getElementById('redirect');
+      let selectedChallengeId = null;
+
+
+      const shareChallenge = (event) => {
+        selectedFriendsField.value = JSON.stringify(selectedFriends.map((friend) => friend.id));
+
+        if (selectedFriends.length === 0) {
+          document.getElementById("no-selected-error").textContent = "Please select at least one friend!";
+          return;
+        }
+
+        redirectField.value = window.location.pathname;
+        challengeIdField.value = selectedChallenge;
+        shareChallengeForm.submit();
+        event.stopImmediatePropagation();
+      }
+
+      document.getElementById('shareChallengeButton').addEventListener('click', shareChallenge);
+  </script>
+
+  <script th:inline="javascript">
+      let shareChallengeModal = new bootstrap.Modal(document.getElementById('share-challenge-modal'), {})
+
+      const showShareChallengeModal = (challengeId) => {
+          document.getElementById("no-selected-error").textContent = "";
+          selectedChallenge = challengeId;
+          updateInvitedFriends();
+          findFriends();
+          shareChallengeModal.show();
+      }
+
+      const closeShareChallengeModal = () => {
+          shareChallengeModal.hide();
+      }
+  </script>
+</div>

@@ -1,0 +1,24 @@
+#share-icon:hover {
+    opacity: 1 !important;
+}
+
+#share-icon {
+    transition: ease-in-out 0.1s !important;
+}
+
+#friend-search-wrapper:focus-within #suggested-friends {
+    display: block !important;
+}
+
+#suggested-friends * {
+    transition: ease-in-out 0.15s !important;
+}
+
+#suggested-friends *:hover {
+    cursor: pointer;
+    background-color: #cbcbcb;
+}
+
+#suggested-friends * img{
+    margin-left: 0.5rem;
+}

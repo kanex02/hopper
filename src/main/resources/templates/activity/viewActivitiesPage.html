@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://thymeleaf.org">
+<head>
+  <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.1.3/css/bootstrap.min.css}">
+  <link rel="stylesheet" type="text/css" th:href="@{/css/styles.css}">
+  <meta http-equiv="Content-Type" context="text/html; charset=UTF-8">
+  <script th:src="@{/webjars/bootstrap/5.1.3/js/bootstrap.min.js}"></script>
+  <link th:href="@{/css/custom.css}" rel="stylesheet">
+  <link th:href="@{/css/viewTeamActivities.css}" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" th:href="@{/css/navbar.css}">
+  <title>My activities</title>
+</head>
+<body class="bg-dark">
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+<div class="main-content container">
+  <div class="row justify-content-center">
+    <div class="col-lg-10 card bg-light p-5">
+      <h2>My activities</h2>
+      <hr>
+      <div>
+        <div class="d-flex flex-wrap gap-3 justify-content-center mb-4">
+          <div th:each="activity : ${activityPage.content}"
+               style="cursor: pointer; width: 30%; min-width: 300px"
+               th:onclick="'window.location.href=\''+@{/activity/}+${activity.id}+'\''"
+               class="card p-3">
+            <div class="position-absolute w-100" th:style="'height: 40px; top: 0; left: 0; z-index: 1; background-color: ' + ${activity.type.color}"></div>
+            <div style="z-index: 2" th:if="${activity.team != null}" th:onclick="'window.location.href=\''+@{/team/}+${activity.team.id}+'\''">
+              <img th:if="${activity.team.image != null}" th:src="@{'/' + ${activity.team.imagePath}}" width="50" height="50" class="rounded-circle border border-1 bg-white"
+                   alt="Profile Picture"/>
+              <img th:if="${activity.team.image == null}" th:src="@{/images/defaultPictureTeam.png}" width="50" class="rounded-circle border border-1 bg-white"
+                   height="50" alt="Profile Picture"/>
+            </div>
+            <div style="z-index: 2" th:if="${activity.team == null}">
+              <img th:if="${user.profilePicture != null}" th:src="@{'/' + ${user.profilePicturePath}}"
+                   width="50" height="50" alt="Profile Picture" class="rounded-circle border border-1 bg-white"/>
+              <img th:if="${user.profilePicture == null}" th:src="@{/images/defaultPicture.png}"
+                   width="50" height="50" alt="Profile Picture" class="rounded-circle border border-1 bg-white"/>
+            </div>
+            <h5 class="card-subtitle mb-2 text-muted ms-2"
+                style="display: inline-block;"
+                th:with="teamName = (${activity.team != null} ? ${activity.team.teamName} : 'Personal'),
+              userName = ${#strings.capitalize(#strings.toLowerCase(activity.type))},
+              link = (${activity.team != null} ?
+                      '<a href=&quot;' + ${basePath} + 'teams/' + ${activity.team.id} + '&quot; style=&quot;cursor: pointer&quot;>' + ${teamName} + '</a>' :
+                      '<a href=&quot;' + ${basePath} + 'user/' + ${activity.user.id} + '&quot; style=&quot;cursor: pointer&quot;>' + ${teamName} + '</a>')"
+                th:utext="${link + ' ' + userName}">
+            </h5>
+
+            <p class="w-100" style="height: 100px; max-height: 100px; overflow-y: auto; border-radius: 2px" th:text="${activity.description}"></p>
+            <hr>
+            <div class="w-100 d-flex text-black-50">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16px" height="16px" fill="currentColor" class="bi bi-geo-alt" viewBox="0 0 16 16" style="min-width: 16px; margin-right: 5px">
+                <path d="M12.166 8.94c-.524 1.062-1.234 2.12-1.96 3.07A31.493 31.493 0 0 1 8 14.58a31.481 31.481 0 0 1-2.206-2.57c-.726-.95-1.436-2.008-1.96-3.07C3.304 7.867 3 6.862 3 6a5 5 0 0 1 10 0c0 .862-.305 1.867-.834 2.94zM8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10z"/>
+                <path d="M8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm0 1a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+              </svg>
+              <p style="height: 2.6rem; overflow-y: auto" class="small" th:text="${(activity.location == null || activity.location.toString == ', ') ? 'No location set' : activity.location}"></p>
+            </div>
+            <div class="w-100 d-flex text-black-50">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-alarm" viewBox="0 0 16 16" style="min-width: 16px; margin-right: 5px">
+                <path d="M8.5 5.5a.5.5 0 0 0-1 0v3.362l-1.429 2.38a.5.5 0 1 0 .858.515l1.5-2.5A.5.5 0 0 0 8.5 9V5.5z"/>
+                <path d="M6.5 0a.5.5 0 0 0 0 1H7v1.07a7.001 7.001 0 0 0-3.273 12.474l-.602.602a.5.5 0 0 0 .707.708l.746-.746A6.97 6.97 0 0 0 8 16a6.97 6.97 0 0 0 3.422-.892l.746.746a.5.5 0 0 0 .707-.708l-.601-.602A7.001 7.001 0 0 0 9 2.07V1h.5a.5.5 0 0 0 0-1h-3zm1.038 3.018a6.093 6.093 0 0 1 .924 0 6 6 0 1 1-.924 0zM0 3.5c0 .753.333 1.429.86 1.887A8.035 8.035 0 0 1 4.387 1.86 2.5 2.5 0 0 0 0 3.5zM13.5 1c-.753 0-1.429.333-1.887.86a8.035 8.035 0 0 1 3.527 3.527A2.5 2.5 0 0 0 13.5 1z"/>
+              </svg>
+              <p class='text-nowrap small mb-1'
+                 th:text="${#temporals.format(activity.startTimeAsLocalDateTime, 'hh:mma dd MMMM yyyy')}"></p>
+            </div>
+            <div class="w-100 d-flex text-black-50">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-alarm-fill" viewBox="0 0 16 16" style="min-width: 16px; margin-right: 5px">
+                <path d="M6 .5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1H9v1.07a7.001 7.001 0 0 1 3.274 12.474l.601.602a.5.5 0 0 1-.707.708l-.746-.746A6.97 6.97 0 0 1 8 16a6.97 6.97 0 0 1-3.422-.892l-.746.746a.5.5 0 0 1-.707-.708l.602-.602A7.001 7.001 0 0 1 7 2.07V1h-.5A.5.5 0 0 1 6 .5zm2.5 5a.5.5 0 0 0-1 0v3.362l-1.429 2.38a.5.5 0 1 0 .858.515l1.5-2.5A.5.5 0 0 0 8.5 9V5.5zM.86 5.387A2.5 2.5 0 1 1 4.387 1.86 8.035 8.035 0 0 0 .86 5.387zM11.613 1.86a2.5 2.5 0 1 1 3.527 3.527 8.035 8.035 0 0 0-3.527-3.527z"/>
+              </svg>
+              <p class='text-nowrap small mb-1'
+                 th:text="${#temporals.format(activity.endTimeAsLocalDateTime, 'hh:mma dd MMMM yyyy')}"></p>
+            </div>
+            <p th:if="${activity.team == null || activity.team.managers.contains(user) || activity.team.coaches.contains(user)}" class="w-100 text-center mb-0 mt-3">
+              <a th:href="@{'/activity/edit/' + ${activity.id}}">
+                <button class="btn btn-primary">Edit</button>
+              </a>
+            </p>
+          </div>
+          <p th:if="${#lists.isEmpty(activityPage.content)}">No activities scheduled.</p>
+        </div>
+        <ul class="pagination">
+          <li class="page-item" th:if="${activityPage.totalPages > 0}" th:each="pageNumber: ${pageNumbers}">
+            <a class="page-link"
+               th:href="@{/activity/view/{userId}(userId= ${userId}, size=${activityPage.size}, page=${pageNumber})}"
+               th:text="${pageNumber}"></a>
+          </li>
+        </ul>
+
+        <div id="button_div">
+          <a th:href="@{/user}" class="text-decoration-none">
+            <button class="btn btn-primary mb-1">Back to user profile</button>
+          </a>
+          <a th:href="@{/activity/create}" class="text-decoration-none">
+            <button class="btn btn-primary mb-1">Create an Activity</button>
+          </a>
+          <a th:href="@{/home}">
+            <button class="btn btn-primary mb-1">Back to Home</button>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

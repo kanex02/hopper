@@ -1,0 +1,95 @@
+[
+  {
+    "place_id": "323672049197",
+    "osm_id": "1005756549",
+    "osm_type": "way",
+    "licence": "https://locationiq.com/attribution",
+    "lat": "-43.5252045",
+    "lon": "172.55520785",
+    "boundingbox": [
+      "-43.5252337",
+      "-43.5251752",
+      "172.5551598",
+      "172.5552559"
+    ],
+    "class": "building",
+    "type": "garage",
+    "display_name": "5, Toorak Avenue, Avonhead, Christchurch, Christchurch City, Canterbury, 8042, New Zealand",
+    "display_place": "Toorak Avenue",
+    "display_address": "5, Avonhead, Christchurch, Christchurch City, Canterbury, 8042, New Zealand",
+    "address": {
+      "house_number": "5",
+      "road": "Toorak Avenue",
+      "suburb": "Avonhead",
+      "city": "Christchurch",
+      "county": "Christchurch City",
+      "state": "Canterbury",
+      "postcode": "8042",
+      "country": "New Zealand",
+      "name": "Toorak Avenue",
+      "country_code": "nz"
+    }
+  },
+  {
+    "place_id": "323672049197",
+    "osm_id": "1005756550",
+    "osm_type": "way",
+    "licence": "https://locationiq.com/attribution",
+    "lat": "-43.52529045",
+    "lon": "172.5551311",
+    "boundingbox": [
+      "-43.5253812",
+      "-43.5252252",
+      "172.5550432",
+      "172.5552143"
+    ],
+    "class": "building",
+    "type": "house",
+    "display_name": "5, Toorak Avenue, Avonhead, Christchurch, Christchurch City, Canterbury, 8042, New Zealand",
+    "display_place": "Toorak Avenue",
+    "display_address": "5, Avonhead, Christchurch, Christchurch City, Canterbury, 8042, New Zealand",
+    "address": {
+      "house_number": "5",
+      "road": "Toorak Avenue",
+      "suburb": "Avonhead",
+      "city": "Christchurch",
+      "county": "Christchurch City",
+      "state": "Canterbury",
+      "postcode": "8042",
+      "country": "New Zealand",
+      "name": "Toorak Avenue",
+      "country_code": "nz"
+    }
+  },
+  {
+    "place_id": "323672049197",
+    "osm_id": "5253326461",
+    "osm_type": "node",
+    "licence": "https://locationiq.com/attribution",
+    "lat": "-43.5253425",
+    "lon": "172.5550637",
+    "boundingbox": [
+      "-43.5253925",
+      "-43.5252925",
+      "172.5550137",
+      "172.5551137"
+    ],
+    "class": "place",
+    "type": "house",
+    "display_name": "5, Toorak Avenue, Avonhead, Christchurch, Christchurch City, Canterbury, 8042, New Zealand",
+    "display_place": "Toorak Avenue",
+    "display_address": "5, Avonhead, Christchurch, Christchurch City, Canterbury, 8042, New Zealand",
+    "address": {
+      "house_number": "5",
+      "road": "Toorak Avenue",
+      "suburb": "Avonhead",
+      "city": "Christchurch",
+      "county": "Christchurch City",
+      "state": "Canterbury",
+      "postcode": "8042",
+      "country": "New Zealand",
+      "name": "Toorak Avenue",
+      "country_code": "nz"
+    }
+  }
+]

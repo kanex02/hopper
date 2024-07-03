@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://thymeleaf.org" style="height: 100%;">
+<head>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.1.3/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/custom.css}">
+    <meta http-equiv="Content-Type" context="text/html; charset=UTF-8">
+    <meta content='initial-scale=1.0, width=device-width' name='viewport'>
+    <title>TAB</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo&display=swap" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" th:href="@{/css/styles.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/css/homePage.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/css/navbar.css}">
+</head>
+<body class="text-white bg-dark d-flex flex-column" style="height: 100%; font-family: 'Heebo', serif">
+<script th:src="@{/webjars/bootstrap/5.1.3/js/bootstrap.min.js}"></script>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="d-flex flex-row flex-grow-1" id="main-content" style="padding: 30px;">
+
+    <div style="width: 260px; padding-right: 40px; color: #cccccc" id="sidebar">
+        <div id="team-list-wrapper" class="">
+            <p id="team-label" class="fs-4">My teams</p>
+            <ul id="team-list" style="list-style-type: none; margin: 0; padding: 0; overflow-y: hidden;z-index: 100">
+                <li th:if="${#lists.size(managedTeams) > 0}"><h6><strong>Manager</strong></h6></li>
+                <li th:each="team:${managedTeams}" th:onclick="|window.location.href='@{/teams/}' + '${team.id}'|"
+                    style="cursor: pointer" class="link">
+                    <p th:text="${team.teamName}"></p>
+                </li>
+                <li th:if="${#lists.size(managedTeams) > 0}"><br></li>
+
+                <li th:if="${#lists.size(coachedTeams) > 0}"><h6><strong>Coach</strong></h6></li>
+                <li th:each="team:${coachedTeams}" th:onclick="|window.location.href='@{/teams/}' + '${team.id}'|"
+                    style="cursor: pointer" class="link">
+                    <p th:text="${team.teamName}"></p>
+                </li>
+                <li th:if="${#lists.size(coachedTeams) > 0}"><br></li>
+
+                <li th:if="${#lists.size(associatedTeams) > 0}"><h6><strong>Member</strong></h6></li>
+                <li th:each="team:${associatedTeams}" th:onclick="|window.location.href='@{/teams/}' + '${team.id}'|"
+                    style="cursor: pointer" class="link">
+                    <p th:text="${team.teamName}"></p>
+                </li>
+                <li th:if="${#lists.size(associatedTeams) > 0}"><br></li>
+
+                <li th:if="${#lists.size(associatedTeams) > 0 && #lists.size(coachedTeams) > 0 && #lists.size(managedTeams) > 0}">
+                    <p>You aren't in any teams yet.</p>
+                </li>
+
+                <li style="margin-bottom: 20px"><p><a th:href="@{teams}" style="color: inherit">View all teams</a></p></li>
+            </ul>
+        </div>
+        <hr>
+    </div>
+
+    <div style="width: 100%; align-content: center" class="text-black container d-flex flex-column gap-4">
+        <div th:replace="~{fragments/hopsProgression :: hopsProgression}"></div>
+        <div class="container" style="gap: 20px; margin: auto; max-width: 1500px; --bs-gutter-x: 0 !important; display: flex; flex-wrap: wrap">
+            <div class="col" style="min-width: 350px;" id="feed-wrapper">
+                <div class='square w-100 h-100 clickable'
+                        th:onclick="|window.location.href='@{/feed}'|"
+                        style="background-color: rgba(203,220,182); float:left; border-radius:12px;
+                        padding: 24px !important;">
+                    <div class="row">
+                        <div class="col-12 d-flex justify-content-between align-items-center">
+                            <h5>Blog Feed</h5> <!-- This is an example title, you can remove or replace it -->
+                            <a th:href="@{/blog/create}">
+                                <button class="btn btn-outline-dark" th:href="@{/blog/create}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle" viewBox="0 0 16 16">
+                                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                        <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                                    </svg> Create Post
+                                </button>
+                            </a>
+                        </div>
+                        <div style="max-height: 500px; overflow-y: auto" class="mt-2 d-flex flex-column gap-3">
+                            <div th:each="post : ${allPosts}" th:value="${post.id}" class="col-12">
+                                <div class="card rounded-form border-0" style="background-color: rgba(183,200,162);">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="d-flex justify-content-between">
+                                                <h4 class="card-title" th:text="${post.title}"></h4>
+                                                <div class="d-flex gap-1">
+                                                    <a th:href="@{'/blog/edit/' + ${post.id}}">
+                                                        <button th:if="${post.getAuthor() == user}" class="btn btn-outline-dark">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                                                 class="bi bi-pencil" viewBox="0 0 16 16">
+                                                                <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
+                                                            </svg>
+                                                            Edit
+                                                        </button>
+                                                    </a>
+                                                    <div class="">
+                                                        <button type="button" class="btn btn-primary"
+                                                                th:if="${post.author.id == user.id && post.deletable}"
+                                                                th:onclick="|openDeleteConfirmation(${post.id}); event.stopPropagation()|">
+                                                            Delete
+                                                        </button>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                            <div style="display: inline-block;" >
+                                                <div th:if="${post.clubProxy} != null" style="cursor: pointer; width: 33px; height: 33px; position: relative; display: inline-block;" th:onclick="|window.location.href='@{/club}/${post.clubProxy.id}'|">
+                                                    <img th:if="${post.clubProxy.imageName != null}" th:src="@{'/' + ${post.clubProxy.imagePath}}" width="100%" height="100%" alt="Profile Picture" class="rounded-circle" style="z-index: 1; position: relative;">
+                                                    <img th:if="${post.clubProxy.imageName == null}" th:src="@{/images/defaultClubPicture.png}" width="100%" height="100%" alt="Profile Picture" class="rounded-circle" style="z-index: 1; position: relative;">
+                                                </div>
+                                                <div th:if="${post.teamProxy} != null" style="cursor: pointer; width: 33px; height: 33px; position: relative; display: inline-block;" th:onclick="|window.location.href='@{/teams}/${post.teamProxy.id}'|">
+                                                    <img th:if="${post.teamProxy.image != null}" th:src="@{'/' + ${post.teamProxy.imagePath}}" width="100%" height="100%" alt="Profile Picture" class="rounded-circle" style="z-index: 1; position: relative;">
+                                                    <img th:if="${post.teamProxy.image == null}" th:src="@{/images/defaultPictureTeam.png}" width="100%" height="100%" alt="Profile Picture" class="rounded-circle" style="z-index: 1; position: relative;">
+                                                </div>
+                                                <div th:if="${post.teamProxy} == null AND ${post.clubProxy} == null" style="cursor: pointer; width: 33px; height: 33px; position: relative; display: inline-block;" th:onclick="|window.location.href='@{/user}/${post.author.id}'|">
+                                                    <img th:if="${post.author.profilePicture != null}" th:src="@{'/' + ${post.author.profilePicturePath}}" width="100%" height="100%" alt="Profile Picture" class="rounded-circle" style="z-index: 1; position: relative;">
+                                                    <img th:if="${post.author.profilePicture == null}" th:src="@{/images/defaultPicture.png}" width="100%" height="100%" alt="Profile Picture" class="rounded-circle" style="z-index: 1; position: relative;">
+                                                    <img th:if="${post.author.border?.path}" th:src="@{${post.author.border?.path}}" class="position-absolute" width="48px" height="auto" style="z-index: 2; left: -8px; top: -8px;">
+                                                </div>
+                                                <h6 class="card-subtitle mb-4 text-muted" style="display: inline-block;"
+                                                    th:with="postMessage=(${post.blogVisibility.name == 'TEAM'} ? 'to ' + ${post.teamTarget.teamName} : (${post.blogVisibility.name == 'CLUB'} ? 'to ' + ${post.clubTarget.name} : '')),
+                                                     userName=${post.author.firstName + ' ' + post.author.lastName},
+                                                     postDate=${post.getFormattedTimeSincePost()},
+                                                     userLink=@{'/user/' + ${post.author.id}}">
+
+                                                    <span th:utext="${postMessage}"></span>
+
+                                                    <a th:href="${userLink}" class="no-underline" style="cursor: pointer; color: black;" th:utext="${userName}"></a>
+
+                                                    <span th:utext="' ' + ${postDate}"></span>
+                                                </h6>
+                                            </div>
+                                            <p class="card-text" th:text="${post.description}"></p>
+                                            <div th:if="${post.mediaType != null}" class="media-wrapper mb-2 bg-light">
+                                                <image th:if="${post.mediaType == 'IMAGE'}" th:src="@{${post.filePath}}"
+                                                       class="blog-post-media"></image>
+                                                <video th:if="${post.mediaType == 'VIDEO'}" th:src="@{${post.filePath}}" controls
+                                                       class="blog-post-media"></video>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <p class="mb-0">Click <span class="text-decoration-underline">here</span> to see more</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col d-flex flex-column" id="right-column" style="min-width: 350px">
+                <div class="row flex-grow-1 clickable"
+                     style="background-color: rgb(220,209,220); border-radius:12px; padding: 24px !important;"
+                     th:onclick="|window.location.href='@{/challenge/view}'|">
+                    <div style="padding: 0; min-height: 200px" id="challenge-container">
+                        <h5 style="margin-bottom: 15px" >Available Challenges</h5>
+                        <div style="max-height: 240px; overflow-y: auto">
+                            <ul id="challenge-list" class="d-flex flex-column gap-3" style="list-style-type: none; margin: 0; padding: 0; overflow-y: auto;">
+                                <li th:each="challenge:${availableChallenges}"
+                                    style="
+                                background-color: rgb(200,189,200);
+                                padding: 15px;
+                                border-radius: 10px;
+                                cursor:pointer"
+                                    th:onclick="|openChallengeModal(${challenge.id}, availableChallenges, this.dataset.author); event.stopImmediatePropagation()|"
+                                    th:data-author="${challenge.userGeneratedFor.firstName}"
+                                    th:classappend="${challenge.isWaitingOnUsers == true} ? 'waiting-on-users' : ''">
+
+                                    <!-- Overlay to show when waiting on users -->
+                                    <div th:if="${challenge.isWaitingOnUsers == true}" class="waiting-overlay rounded-4 d-flex flex-column">
+                                        <svg height="50" width="50">
+                                            <circle cx="25" cy="25" r="20" stroke="white" stroke-width="4" fill="none" />
+                                            <line x1="25" y1="25" x2="25" y2="10" style="stroke:white;stroke-width:3" />
+                                            <line x1="25" y1="25" x2="40" y2="25" style="stroke:white;stroke-width:3" />
+                                        </svg>
+                                        <p>Waiting on other users</p>
+                                    </div>
+
+                                    <h5 class="mb-0">
+                                        <span th:text="${challenge.title}"></span>
+                                        <span th:if="${challenge.hops != null}"> (<span th:text="${challenge.hops}"></span> Hops)</span>
+                                        <span th:if="${challenge.isShared}" class="rounded-pill small gold-background">+20%!</span>
+                                    </h5>
+                                    <p style="margin-bottom: 0" th:text="${challenge.goal}"></p>
+                                    <p style="margin-bottom: 0" th:text="${'Expires: ' + #temporals.format(challenge.getEndDate(), 'hh:mma dd MMMM yyyy')}"></p>
+                                    <div style="position: relative; height: 16px; margin-left: 0" class="d-flex flex-nowrap align-items-center mt-2">
+                                        <div th:if="${challenge.userGeneratedFor.id} == ${user.id}" id="share-icon" style="opacity: 0.8; background-color: #256ed9" th:onclick="|showShareChallengeModal(${challenge.id}); event.stopImmediatePropagation()|"
+                                             class="d-flex flex-nowrap align-items-center py-1 px-2 rounded-pill text-light">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor"
+                                                 class="bi bi-send-fill" viewBox="0 0 16 16">
+                                                <path d="M15.964.686a.5.5 0 0 0-.65-.65L.767 5.855H.766l-.452.18a.5.5 0 0 0-.082.887l.41.26.001.002 4.995 3.178 3.178 4.995.002.002.26.41a.5.5 0 0 0 .886-.083l6-15Zm-1.833 1.89L6.637 10.07l-.215-.338a.5.5 0 0 0-.154-.154l-.338-.215 7.494-7.494 1.178-.471-.47 1.178Z"/>
+                                            </svg>
+                                            <div th:id="share-text" style="width: 5ch; overflow: hidden">
+                                                <p class="mb-0 text-nowrap small" style="margin-left: 0.25rem">Share</p>
+                                            </div>
+                                        </div>
+
+                                        <div th:unless="${challenge.userGeneratedFor.id} == ${user.id}">
+                                            <div th:id="share-text" class="d-flex align-items-center">
+                                                <span class="small">Invited by </span>
+                                                <a th:href="@{/user/}+${challenge.userGeneratedFor.id}" onclick="event.stopImmediatePropagation()" class="text-body"><p class="mb-0 text-nowrap small" style="max-width: 20ch; overflow: hidden;margin-left: 0.25rem; text-overflow:ellipsis;" th:text="|${challenge.userGeneratedFor.firstName}|"></p></a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </li>
+                                <li th:if="${#lists.isEmpty(availableChallenges)}">
+                                    <p style="margin: 0;">No challenges at the moment...</p>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="row flex-grow-1 clickable"
+                     style="background-color: rgb(232,226,171); border-radius:12px; margin-top: 30px; padding: 24px !important;"
+                     th:onclick="|window.location.href='@{/activity/view/}' + '${user.id}'|">
+                    <div style="padding: 0; min-height: 200px" id="activity-container">
+                        <h5 style="margin-bottom: 15px">Upcoming Activities</h5>
+
+                        <ul id="activity-list" class="gap-3 d-flex flex-column" style="list-style-type: none; margin: 0; padding: 0; overflow-y: auto; max-height: 0">
+                            <li th:each="activity:${activities}" th:onclick="|window.location.href='@{/activity/}' + '${activity.id}'; event.stopPropagation()|"
+                                style="
+                                background-color: rgb(212,205,133);
+                                padding: 15px;
+                                border-radius: 10px;
+                                cursor:pointer">
+                                <h5 th:text="${(activity.team == null) ? 'Personal' : (activity.team.teamName) } + ' ' +
+                                ${#strings.capitalize(#strings.toLowerCase((activity.type.toString == 'OTHER')?'ACTIVITY':activity.type))}"
+                                    style="margin-bottom: 0"></h5>
+                                <p style="margin-bottom: 0" th:if="${activity.location?.isValid}" th:text="${activity.location}"></p>
+                                <p style="margin-bottom: 0" th:text="${#temporals.format(activity.startTimeAsLocalDateTime, 'hh:mma dd MMMM yyyy')}"></p>
+                            </li>
+                            <li th:if="${#lists.size(activities) == 0}">
+                                <p style="margin: 0">Nothing's happening soon.</p>
+                                <a th:href="@{/activity/create}" style="color: inherit">Click here to create your own activity!</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div style="width: 260px"></div>
+</div>
+<div th:replace="~{fragments/challengeModal :: challengeModal}"></div>
+<div th:replace="~{fragments/deletePostModal :: deletePostModal}"></div>
+<div th:replace="~{fragments/shareChallengeModal :: shareChallengeModal}"></div>
+</body>
+<script>
+    // Function to set dynamic max-height for the #activity-list container. What we do for a touch of extra aesthetics.
+    function setDynamicMaxHeight() {
+        const parentContainer = document.getElementById('activity-container');
+        const activityList = document.getElementById('activity-list');
+
+        let parentHeight = parentContainer.clientHeight;
+        let maxHeight = parentHeight * 0.95 - 39;
+
+        activityList.style.maxHeight = maxHeight + 'px';
+    }
+
+    setDynamicMaxHeight();
+    window.onload = setDynamicMaxHeight;
+    window.onresize = setDynamicMaxHeight;
+</script>
+<script>
+    let teamList = document.getElementById('team-list')
+    let teamListWrapper = document.getElementById('team-list-wrapper')
+    const listHeight = teamList.clientHeight;
+    teamList.style.height = '0px';
+    teamListWrapper.addEventListener('mouseover', ()=> {
+        teamList.style.height = listHeight + 'px'
+    })
+    teamListWrapper.addEventListener('mouseout', ()=>{
+        teamList.style.height = '0px'
+    })
+</script>
+
+<script>
+
+    const challengeId = [[${challengeId}]];
+
+    function openChallengeForm() {
+
+        if (challengeId) {
+            openChallengeModal(challengeId, availableChallenges, availableChallenges.filter(challenge => challenge.id === challengeId)[0].userGeneratedFor.firstName);
+            openCompleteChallenge();
+        }
+    }
+
+    openChallengeForm();
+
+</script>
+
+<script th:inline="javascript">
+    fetchBlogPosts([[${basePath}]])
+</script>
+</html>
+
+

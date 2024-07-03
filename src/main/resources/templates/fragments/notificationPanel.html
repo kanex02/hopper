@@ -1,0 +1,87 @@
+<div th:fragment="notificationsPanel" class="notifications-box ">
+    <li th:if="${user != null}" class="nav-item dropdown">
+        <a id="showNotificationsButton" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="position: relative;">
+            <div style="position: relative; display: inline-block;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-bell" viewBox="0 0 16 16">
+                    <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2zM8 1.918l-.797.161A4.002 4.002 0 0 0 4 6c0 .628-.134 2.197-.459 3.742-.16.767-.376 1.566-.663 2.258h10.244c-.287-.692-.502-1.49-.663-2.258C12.134 8.197 12 6.628 12 6a4.002 4.002 0 0 0-3.203-3.92L8 1.917zM14.22 12c.223.447.481.801.78 1H1c.299-.199.557-.553.78-1C2.68 10.2 3 6.88 3 6c0-2.42 1.72-4.44 4.005-4.901a1 1 0 1 1 1.99 0A5.002 5.002 0 0 1 13 6c0 .88.32 4.2 1.22 6z"/>
+                </svg>
+                <svg th:each="notification : ${user.notifications}" th:if="${notification.unreadUsers.contains(user)}" id="redDot" xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="red" class="bi bi-dot position-absolute z-10" viewBox="0 0 32 32" style="top: 0; transform: scale(2);">
+                    <path d="M8 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"/>
+                </svg>
+            </div>
+        </a>
+
+        <div id="notificationDropdown" class="dropdown-menu p-2" aria-labelledby="addDropdown">
+            <h5 class="p-2">Notifications</h5>
+            <div th:if="${user.notifications.size() == 0}">
+                <hr>
+                <p class="p-2">No notifications</p>
+            </div>
+
+            <div id="notification-list" class="overflow-scroll">
+                <div th:each="notification : ${user.notifications}">
+
+                    <div id="noti-element">
+                        <div class="dropdown-divider m-0"></div>
+
+                        <div class="dropdown-item mt-1 mb-1 rounded-form" th:onclick="|window.location.href='@{'/notification/' + ${notification.id}}'|"
+                           th:style="${!notification.unreadUsers.contains(user)} ? 'background-color: WhiteSmoke; cursor: pointer' : 'cursor: pointer'">
+
+                            <div class="row">
+                                <div class="col-3 d-flex align-items-center" th:onclick="|window.location.href='@{'/notification/relatedEntity/' + ${notification.id}}'; event.stopImmediatePropagation()|" style="cursor: pointer">
+                                    <div class="notification-pic position-relative" th:if="${notification.relatedUser}"
+                                         th:switch="${notification.relatedUser.profilePicturePath}">
+                                        <img class="bg-light rounded-circle" width="50" height="50" th:case="null"
+                                             th:src="@{/images/defaultPicture.png}">
+                                        <img class="bg-light rounded-circle" width="50" height="50" th:case="*"
+                                             th:src="@{'/' + ${notification.relatedUser.profilePicturePath}}">
+                                        <img th:if="${notification.relatedUser.border?.path}" th:src="@{${notification.relatedUser.border?.path}}"
+                                             class="position-absolute" width="66px" height="auto" style="z-index: 2; left: -8px; top: -8px;">
+                                    </div>
+
+                                    <div class="notification-pic" th:if="${notification.relatedTeam}"
+                                         th:switch="${notification.relatedTeam.imagePath}">
+                                        <img class="bg-light rounded-circle" width="50" height="50" th:case="null"
+                                             th:src="@{'/images/defaultPictureTeam.png'}">
+                                        <img class="bg-light rounded-circle" width="50" height="50" th:case="*"
+                                             th:src="@{'/' + ${notification.relatedTeam.imagePath}}">
+                                    </div>
+
+                                    <div class="notification-pic" th:if="${notification.relatedClub}"
+                                         th:switch="${notification.relatedClub.imageName}">
+                                        <img class="bg-light rounded-circle" width="50" height="50" th:case="null"
+                                             th:src="@{'/images/defaultClubPicture.png'}">
+                                        <img class="bg-light rounded-circle" width="50" height="50" th:case="*"
+                                             th:src="@{${'/' + notification.club.imagePath}}">
+                                    </div>
+                                </div>
+
+                                <div class="col-7">
+                                    <p class="text-wrap mb-2" th:if="${notification.relatedUser}"
+                                       th:text="${notification.relatedUser.firstName + ' ' + notification.description}"
+                                    style="white-space: normal; word-break: break-word;"></p>
+
+                                    <p class="text-wrap overflow-hidden mb-2" th:if="${notification.relatedTeam}"
+                                       th:text="${notification.relatedUser.firstName + ' ' + notification.description}"></p>
+
+                                    <p class="text-wrap overflow-hidden mb-2" th:if="${notification.relatedClub}"
+                                       th:text="${notification.relatedUser.firstName + ' ' + notification.description}"></p>
+
+                                    <span class="text-muted"
+                                          th:text="${notification.getFormattedTimeSinceCreated}"></span>
+                                </div>
+                                <div class="col-2 d-flex justify-content-center align-items-center p-0 m-0">
+                                    <svg id="redDot" th:if="${notification.unreadUsers.contains(user)}" xmlns="http://www.w3.org/2000/svg" width="42" height="42" fill="red" class="bi bi-dot z-10" viewBox="0 0 16 16">
+                                        <path d="M8 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"/>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </li>
+</div>

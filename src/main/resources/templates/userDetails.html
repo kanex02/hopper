@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://thymeleaf.org">
+<head>
+  <link rel="stylesheet" type="text/css" th:href="@{/css/styles.css}">
+  <meta http-equiv="Content-Type" context="text/html; charset=UTF-8">
+  <script th:src="@{/webjars/bootstrap/5.1.3/js/bootstrap.min.js}"></script>
+  <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.1.3/css/bootstrap.min.css}">
+  <link rel="stylesheet" type="text/css" th:href="@{/css/navbar.css}">
+  <title>Project - User Profile</title>
+</head>
+<body>
+<div class="details_page">
+
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="main-content">
+  <img th:if="${user.profilePicture != null}" th:src="@{${'../' + user.getProfilePicturePath()}}" width="200" height="200" alt="Profile Picture"/>
+  <img th:if="${user.profilePicture == null}" th:src="@{/images/defaultPicture.png}" width="200" height="200" alt="Profile Picture"/>
+
+  <h1 th:text="'Name: ' + ${user.firstName} + ' ' + ${user.lastName}"></h1>
+  <h2 th:text="'Email: ' + ${user.email}"></h2>
+  <h2 th:text="'Date of Birth: ' + ${user.dateOfBirth}"></h2>
+  <h2 th:text="'Favourite Sports: ' + ${user.getFavouriteSportNames()}" id="favouriteSportsLabel"></h2>
+
+
+  <div>
+    <a class="btn btn-primary" th:href="@{${prevUrl}}">Back</a>
+  </div>
+
+</div>
+</div>
+</body>
+</html>

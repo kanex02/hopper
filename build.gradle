@@ -1,0 +1,137 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.0.2'
+	id 'io.spring.dependency-management' version '1.1.0'
+	id 'jacoco'
+	id 'org.sonarqube' version '4.0.0.2929'
+	id 'io.miret.etienne.sass' version '1.5.0'
+}
+
+group = 'nz.ac.canterbury.seng302'
+archivesBaseName = 'tab'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '17'
+
+sourceSets {
+    acceptanceTest {
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += sourceSets.main.output
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+configurations {
+    cucumberRuntime {
+        extendsFrom testImplementation
+    }
+
+    acceptanceTestImplementation.extendsFrom testImplementation
+    acceptanceTestRuntimeOnly.extendsFrom testRuntimeOnly
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter'
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'com.h2database:h2'
+	implementation 'org.mariadb.jdbc:mariadb-java-client:3.0.4'
+	implementation 'org.webjars:bootstrap:5.1.3'
+	implementation "org.springframework.boot:spring-boot-starter-security"
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.boot:spring-boot-starter-mail:3.0.4'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.security:spring-security-test'
+	testImplementation "io.cucumber:cucumber-spring:7.5.0"
+	testImplementation "io.cucumber:cucumber-java:7.5.0"
+	testImplementation "com.microsoft.playwright:playwright:1.32.0"
+
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+    finalizedBy jacocoTestReport
+}
+
+// Jacoco test coverage configuration
+jacoco {
+    toolVersion = "0.8.9"
+}
+
+// select what reports Jacoco generates and where to put them
+jacocoTestReport {
+    reports {
+        xml.enabled true
+        xml.destination file("${buildDir}/jacoco/test-report.xml")
+        csv.enabled false
+        html.destination file("${buildDir}/jacoco/html")
+    }
+}
+
+sonarqube {
+    properties {
+        property "sonar.projectKey", "team-1000"
+        property "sonar.projectName", "team 1000"
+        property "sonar.sourceEncoding", "UTF-8"
+        property "sonar.host.url", "https://sonarqube.csse.canterbury.ac.nz"
+        property "sonar.login", "$System.env.SONARQUBE_TOKEN"
+    }
+}
+
+tasks.register('end2end') {
+    dependsOn assemble, testClasses
+    group = "verification"
+    doLast {
+        javaexec {
+            main = "io.cucumber.core.cli.Main"
+            classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
+            args = [
+                    '--plugin', 'pretty',
+                    '--plugin', 'html:target/end2end-report.html',
+                    '--glue', '/nz/ac/canterbury/seng302/tab/end2end', // points to step definitions and Cucumber config. The root for this is the src/test/java package.
+                    'src/test/resources/features/end2end' // points to the feature files. The root for this is the project root.
+            ]
+        }
+    }
+}
+
+tasks.register('acceptanceTest') {
+    dependsOn assemble, acceptanceTestClasses
+    group = "verification"
+    doLast {
+        javaexec {
+            main = "io.cucumber.core.cli.Main"
+            classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output + sourceSets.acceptanceTest.output
+            args = [
+                    '--plugin', 'pretty',
+                    '--plugin', 'html:target/acceptanceTest-report.html',
+                    '--glue', '/nz/ac/canterbury/seng302/tab/cucumber', // points to step definitions and Cucumber config. The root for this is the src/test/java package.
+                    'src/acceptanceTest/resources/features/' // points to the feature files. The root for this is the project root.
+            ]
+        }
+    }
+    finalizedBy jacocoTestReport
+}
+
+tasks.register('buildUnity', Exec) {
+    if (System.getProperty('os.name').toLowerCase().contains('windows')) {
+        commandLine 'cmd', '/c', 'Unity', '-quit', '-batchmode', '-executeMethod', 'Builder.Build'
+    }
+}
+
+compileSass {
+    // Directory where to output generated CSS:
+    outputDir = project.file("src/main/resources/static/css")
+
+    // Source directory containing sass to compile:
+    sourceDir = project.file("src/main/resources/static/sass")
+}
+
+bootJar.dependsOn compileSass
+processResources.dependsOn compileSass

@@ -1,0 +1,37 @@
+#searchbar {
+    white-space: nowrap;
+    display: flex;
+}
+
+#submitBtn {
+    margin-left: 10px;
+}
+
+#multiselectDropdown {
+    line-height: 2;
+    display: flex;
+    height: 38px;
+}
+
+#filterButton {
+    float: right;
+}
+
+.placeholder {
+    border: none;
+    cursor: default;
+    color: rgba(0, 0, 0, 0);
+    background-color: rgba(0, 0, 0, 0);
+    margin: 0 !important;
+    padding: 0 !important;
+    display: inline-flex;
+    align-items: center;
+}
+
+#main-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin-top: 0rem;
+}
